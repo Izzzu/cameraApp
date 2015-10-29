@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">CameraApp</string>
+    <string name="action_settings">Settings</string>
+    <string name="button_camera">Camera</string>
+    <string name="image_cd_camera">Description of camera content</string>
+    <string name="some_text">Some text</string>
+    <string name="button_video">Live video</string>
+    <string name="video_cd_camera">Video description</string>
+</resources>
