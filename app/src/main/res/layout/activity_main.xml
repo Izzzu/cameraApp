@@ -5,33 +5,17 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:layout_width="fill_parent"
+    <FrameLayout
+        android:id="@+id/camera_preview"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1"/>
+
+    <Button
+        android:id="@+id/button_capture"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/some_text"/>
-
-    <Button
-        android:id="@+id/button_camera"
-        android:text="@string/button_camera"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/button_video"
-        android:text="@string/button_video"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <ImageView
-        android:id="@+id/image_camera"
-        android:contentDescription="@string/image_cd_camera"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
-
-    <VideoView
-        android:id="@+id/video_camera"
-        android:contentDescription="@string/video_cd_camera"
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content" />
+        android:layout_gravity="center"
+        android:text="@string/liveCamera"/>
 
 </LinearLayout>

@@ -6,4 +6,5 @@
     <string name="some_text">Some text</string>
     <string name="button_video">Live video</string>
     <string name="video_cd_camera">Video description</string>
+    <string name="liveCamera">Live camera</string>
 </resources>
