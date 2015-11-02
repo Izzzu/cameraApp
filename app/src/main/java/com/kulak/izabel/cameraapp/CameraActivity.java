@@ -9,9 +9,11 @@ import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -24,7 +26,6 @@ public class CameraActivity extends Activity {
 
     private Camera mCamera;
     private CameraPreview mPreview;
-    android.support.v4.app.NotificationCompat.Builder mBuilder;
 
     private View.OnClickListener cameraPictureListener = new View.OnClickListener() {
         @Override
@@ -75,7 +76,7 @@ public class CameraActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_camera);
 
         mCamera = getCameraInstance();
 
@@ -106,7 +107,22 @@ public class CameraActivity extends Activity {
         mPreview.setLayoutParams(new FrameLayout.LayoutParams(optimalPreviewSize.width, optimalPreviewSize.height));
         Button cameraButton = (Button) findViewById(R.id.button_capture);
         cameraButton.setOnClickListener(cameraPictureListener);
+        try {
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        } catch (NullPointerException e) {
+            Log.d("Camera", "There is no action bar");
+        }
 
+        final TextView textView = (TextView)findViewById(R.id.touch_coordinates);
+        // this is the view on which you will listen for touch events
+        mPreview.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                textView.setText("Touch coordinates : " +
+                        String.valueOf(event.getX()) + "x" + String.valueOf(event.getY()));
+                return true;
+            }
+        });
 
     }
 
@@ -146,20 +162,7 @@ public class CameraActivity extends Activity {
         Camera camera = null;
         try {
             camera = Camera.open();
-            /*Camera.Parameters params = camera.getParameters();
 
-            List<Camera.Size> sizes = params.getSupportedPictureSizes();
-
-            Camera.Size mSize = null; //TODO:null!!!!
-            for (Camera.Size size : sizes) {
-                Log.i("Camera", "Available resolution: " + size.width + " " + size.height);
-                mSize = size;
-            }
-
-            Log.i("Camera", "Chosen resolution: " + sizes.get(0).width + " " + sizes.get(0).height);
-            params.setPictureSize(mSize.width, mSize.height);
-            camera.setParameters(params);
-*/
         } catch (Exception e) {
             Log.d("Camera", "Camera is not available");
             e.printStackTrace();
