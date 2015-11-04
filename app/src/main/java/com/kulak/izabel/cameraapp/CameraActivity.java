@@ -1,21 +1,27 @@
 package com.kulak.izabel.cameraapp;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Point;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.support.annotation.Nullable;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -32,6 +38,7 @@ public class CameraActivity extends Activity {
         public void onClick(View v) {
             mCamera.takePicture(null, null, mPicture);
             Toast.makeText(getApplicationContext(), "Image saved", Toast.LENGTH_LONG).show();
+
             mCamera.startPreview();
         }
     };
@@ -43,6 +50,32 @@ public class CameraActivity extends Activity {
         @Override
         public void onPictureTaken(byte[] data, Camera camera) {
 
+            Bitmap initBmp;
+            Bitmap finishBmp;
+            byte[] outData = data;
+            if (touchPoint != null) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inMutable = true;
+                initBmp = BitmapFactory.decodeByteArray(data, 0, data.length, options);
+                Canvas canvas = new Canvas(initBmp);
+                finishBmp = new FloodFill().floodFill(initBmp, touchPoint, 2, 8);
+
+//Create a view here
+                ByteArrayOutputStream stream = new ByteArrayOutputStream();
+                finishBmp.compress(Bitmap.CompressFormat.PNG, 100, stream);
+                outData = stream.toByteArray();
+                LinearLayout v = new LinearLayout(CameraActivity.this);
+                //populate layout with your image and text or whatever you want to put in here
+                ImageView child = new ImageView(getApplicationContext());
+                child.setImageBitmap(finishBmp);
+                v.addView(child);
+                        Toast toast = new Toast(getApplicationContext());
+                toast.setGravity(Gravity.CENTER_VERTICAL, 0, 0);
+                toast.setDuration(Toast.LENGTH_LONG);
+                toast.setView(v);
+                toast.show();
+
+            }
             File photoDir = getPictureDir();
             if (photoDir == null) {
                 return;
@@ -50,8 +83,9 @@ public class CameraActivity extends Activity {
             File pictureFile = new File(photoDir.getPath() + File.separator + "PICTURE_" + picNr + ".jpg");
             try {
                 FileOutputStream fos = new FileOutputStream(pictureFile);
-                fos.write(data);
+                fos.write(outData);
                 fos.close();
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -60,8 +94,8 @@ public class CameraActivity extends Activity {
 
         }
     };
+    private Point touchPoint = null;
 
-    @Nullable
     private File getPictureDir() {
         File photoDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "picture_" + picNr + ".jpg");
         if (!photoDir.exists()) {
@@ -82,6 +116,7 @@ public class CameraActivity extends Activity {
 
         mPreview = new CameraPreview(this, mCamera);
         FrameLayout frameLayout = (FrameLayout) findViewById(R.id.camera_preview);
+
         frameLayout.addView(mPreview);
         List<Camera.Size> sizes = mPreview.getmSupportedPreviewSizes();
         Point displaySize = new Point();
@@ -118,12 +153,12 @@ public class CameraActivity extends Activity {
         mPreview.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
+                touchPoint = new Point((int)event.getX(), (int)event.getY());
                 textView.setText("Touch coordinates : " +
                         String.valueOf(event.getX()) + "x" + String.valueOf(event.getY()));
                 return true;
             }
         });
-
     }
 
     private Camera.Size getOptimalPreviewSize(List<Camera.Size> sizes, int w, int h) {

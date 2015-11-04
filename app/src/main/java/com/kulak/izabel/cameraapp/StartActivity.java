@@ -22,6 +22,14 @@ public class StartActivity extends Activity {
                 StartActivity.this.startActivity(changeActivity);
             }
         });
+        final Button fancyButton = (Button) findViewById(R.id.button_run_fancy_camera);
+        fancyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent changeActivity = new Intent(StartActivity.this, FancyCameraActivity.class);
+                StartActivity.this.startActivity(changeActivity);
+            }
+        });
 
     }
 
