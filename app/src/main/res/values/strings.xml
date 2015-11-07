@@ -8,4 +8,5 @@
     <string name="video_cd_camera">Video description</string>
     <string name="liveCamera">Live camera</string>
     <string name="fancyCamera">Run fancy cam</string>
+    <string name="take_photo">Take a photo</string>
 </resources>
