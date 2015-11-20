@@ -8,6 +8,14 @@ import java.util.Queue;
 
 public class FloodFill {
 
+//    public Mat fillflood(Mat src, org.opencv.core.Point point, Scalar targetColor, Scalar replacementColor) {
+//
+//        if (targetColor.equals(replacementColor)) {
+//        }
+//
+//
+//        }
+
     public Bitmap floodFill(Bitmap initImage, Point node, int targetColor,
                             int replacementColor) {
         Bitmap image = initImage;
