@@ -143,7 +143,7 @@ public class CameraActivity extends Activity {
         Button cameraButton = (Button) findViewById(R.id.button_capture);
         cameraButton.setOnClickListener(cameraPictureListener);
         try {
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+           //getActionBar().setDisplayHomeAsUpEnabled(true);
         } catch (NullPointerException e) {
             Log.d("Camera", "There is no action bar");
         }

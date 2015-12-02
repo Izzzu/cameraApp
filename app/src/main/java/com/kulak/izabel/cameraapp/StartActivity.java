@@ -4,7 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 public class StartActivity extends Activity {
 
@@ -14,7 +14,7 @@ public class StartActivity extends Activity {
 
         setContentView(R.layout.activity_start);
 
-        final Button button = (Button) findViewById(R.id.button_live_camera);
+       /* final Button button = (Button) findViewById(R.id.button_live_camera);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -29,8 +29,23 @@ public class StartActivity extends Activity {
                 Intent changeActivity = new Intent(StartActivity.this, FancyCameraActivity.class);
                 StartActivity.this.startActivity(changeActivity);
             }
+        });*/
+        final ImageButton colorPhotoButton = (ImageButton) findViewById(R.id.button_run_color_photo);
+        colorPhotoButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent changeActivity = new Intent(StartActivity.this, PhotoActivity.class);
+                StartActivity.this.startActivity(changeActivity);
+            }
+        });
+        final ImageButton blobColorDetectionButton = (ImageButton) findViewById(R.id.button_run_blob_detection_camera);
+        blobColorDetectionButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent changeActivity = new Intent(StartActivity.this, ColorBlobDetectionActivity.class);
+                StartActivity.this.startActivity(changeActivity);
+            }
         });
 
     }
-
 }

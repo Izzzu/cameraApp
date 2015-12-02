@@ -25,15 +25,20 @@ import org.opencv.core.MatOfInt4;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
+import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
+import static org.opencv.imgproc.Imgproc.COLOR_BGR2BGRA;
 import static org.opencv.imgproc.Imgproc.Canny;
+import static org.opencv.imgproc.Imgproc.FLOODFILL_FIXED_RANGE;
+import static org.opencv.imgproc.Imgproc.FLOODFILL_MASK_ONLY;
 import static org.opencv.imgproc.Imgproc.cvtColor;
 
 public class FancyCameraActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2, View.OnTouchListener {
@@ -47,6 +52,10 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
     private Point touchPoint;
     private Random random = new Random();
 
+    private Mat mRgba;
+
+    private List<org.opencv.core.Point> seedPoints = new LinkedList<>();
+    private org.opencv.core.Point currentSeedPoint;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -64,7 +73,7 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
             }
         }
     };
-    private Mat mRgba = new Mat();
+    private static boolean started = false;
 
 
     @Override
@@ -124,6 +133,7 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
 
     @Override
     public void onCameraViewStarted(int width, int height) {
+        mRgba = new Mat(height, width, CvType.CV_8UC4);
 
     }
 
@@ -135,51 +145,60 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
     @Override
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
 
+
+        mRgba = inputFrame.rgba();
         if (TOUCHED) {
             Log.d(TAG, "before prepare mat");
-            mRgba = inputFrame.rgba();
-            return prepareMat(mRgba);
+            //for (org.opencv.core.Point point : seedPoints) {
+            org.opencv.core.Point point = seedPoints.get(seedPoints.size()-1);
+                Mat temp = prepareMat(mRgba, point, started);
+                Imgproc.cvtColor(temp, mRgba, COLOR_BGR2BGRA);
+           // }
+            return mRgba;
         }
         Log.d(TAG, "after if mat");
 
-        return inputFrame.rgba();
+        return mRgba;
 
     }
 
     @SuppressLint("SimpleDateFormat")
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        TOUCHED = true;
+        touchPoint = new Point((int) event.getX(), (int) event.getY());
+        Log.d(TAG, "onTouch event");
+
+        Log.d(TAG, "src type:" + mRgba.type());
 
         int cols = mRgba.cols();
         int rows = mRgba.rows();
 
-        int xOffset = (fancyCameraView.getWidth() - cols) / 2;
-        int yOffset = (fancyCameraView.getHeight() - rows) / 2;
 
-        int x = (int)event.getX() - xOffset;
-        int y = (int)event.getY() - yOffset;
+        double x = (event.getX() / fancyCameraView.getWidth() * cols);
+        double y = (event.getY() / fancyCameraView.getHeight() * rows);
 
-        Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
+        currentSeedPoint = new org.opencv.core.Point(x, y);
 
-        if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
-        TOUCHED = true;
-        touchPoint = new Point(x, y);
-        Log.d(TAG, "onTouch event");
-
+        Log.d(TAG, "point: " + currentSeedPoint.x + " ," + currentSeedPoint.y);
+        Log.d(TAG, "cols: " + cols + " , rows:" + rows);
+        Log.d(TAG, "fancyCameraView.getWidth(): " + fancyCameraView.getWidth() + " , fancyCameraView.getHeight():" + fancyCameraView.getHeight());
+        seedPoints.add(currentSeedPoint);
 
         return false;
     }
 
-    private Mat prepareMat(Mat src) {
+    private Mat prepareMat(Mat src, org.opencv.core.Point point, boolean started) {
 
-        Log.d(TAG, "src type:" + src.type());
+
 /*        Mat gray = src.clone();
         Mat hsvImage = src.clone();
         Mat destMat = new Mat();
 
       //  Imgproc.cvtColor(src, hsvImage, Imgproc.COLOR_BGR2HSV);
        // Imgproc.cvtColor(src, gray, Imgproc.COLOR_RGBA2GRAY);
-        Imgproc.GaussianBlur(src, src, new Size(5,5), 2.2, 2);
+        Imgproc.
+        (src, src, new Size(5,5), 2.2, 2);
 
         /// Apply Laplace function
         *//*
@@ -222,26 +241,26 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
         Log.d(TAG, "channels: "+ src.channels());
         int number = ~(Imgproc.FLOODFILL_MASK_ONLY);
 
-        org.opencv.core.Point seedPoint = new org.opencv.core.Point((touchPoint.x * 640) / fancyCameraView.getWidth(), (touchPoint.y*480)/fancyCameraView.getHeight());
+        org.opencv.core.Point currentSeedPoint = new org.opencv.core.Point((touchPoint.x * 640) / fancyCameraView.getWidth(), (touchPoint.y*480)/fancyCameraView.getHeight());
         Log.d(TAG, "touch point:"+ touchPoint.toString());
-        Log.d(TAG, "opencv point:"+ seedPoint.toString());
+        Log.d(TAG, "opencv point:"+ currentSeedPoint.toString());
         Log.d(TAG, "image points: "+ hsvImage.rows() + " - " + hsvImage.cols());
 
 
         Mat mask = Mat.zeros(hsvImage.rows() + 2, hsvImage.cols() + 2, CvType.CV_8U);
         Mat black = new Mat(hsvImage.rows() + 2, hsvImage.cols() + 2, CvType.CV_8U);
-       // Mat maskROI = new Mat(new Rect(seedPoint, hsvImage.size()));
+       // Mat maskROI = new Mat(new Rect(currentSeedPoint, hsvImage.size()));
         new Mat();
-        *//*Imgproc.floodFill(hsvImage, mask.inv(), seedPoint, newVal, rect, lowerDifference,
+        *//*Imgproc.floodFill(hsvImage, mask.inv(), currentSeedPoint, newVal, rect, lowerDifference,
                 upperDifference, 4 + (255 << 8) + Imgproc.FLOODFILL_MASK_ONLY);
  *//*
-        double[] doubles = hsvImage.get((int) seedPoint.x, (int) seedPoint.y);
+        double[] doubles = hsvImage.get((int) currentSeedPoint.x, (int) currentSeedPoint.y);
 
         for (double d : doubles) {
 
             Log.d(TAG, "double:: "+d);
         }
-        Imgproc.floodFill(hsvImage, mask, seedPoint, newVal, rect, lowerDifference,
+        Imgproc.floodFill(hsvImage, mask, currentSeedPoint, newVal, rect, lowerDifference,
                 upperDifference, 4 + (255 << 8) + Imgproc.FLOODFILL_MASK_ONLY);*/
 
 
@@ -293,14 +312,15 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
 
         // init
 
-        Mat gray =src.clone();
+        Mat gray = src.clone();
         Mat end = src.clone();
         Mat hsvImage = src.clone();
         Mat laplacian = src.clone();
         cvtColor(src, hsvImage, Imgproc.COLOR_BGRA2BGR);
         cvtColor(src, laplacian, Imgproc.COLOR_BGRA2BGR);
         cvtColor(src, end, Imgproc.COLOR_BGRA2BGR);
-        Mat markers = hsvImage.clone();
+        Mat clone = hsvImage.clone();
+        Mat markers = clone;
 
         cvtColor(hsvImage, gray, Imgproc.COLOR_BGR2GRAY);
         //Imgproc.cvtColor(hsvImage, markers, Imgproc.COLOR_BGR2GRAY);
@@ -311,18 +331,17 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
         Log.d(TAG, "CvType.CV_8UC3 :" + CvType.CV_8UC3);
         Log.d(TAG, "CvType.CV_32SC1 :" + CvType.CV_32SC1);
 
-        org.opencv.core.Point seedPoint = new org.opencv.core.Point((touchPoint.x * 640) / fancyCameraView.getWidth(), (touchPoint.y*480)/fancyCameraView.getHeight());
+        //new org.opencv.core.Point((touchPoint.x * 640) / fancyCameraView.getWidth(), (touchPoint.y * 480) / fancyCameraView.getHeight());
         //src.convertTo(end, 32);
         //Imgproc.cvtColor(end, end, CvType.CV_32S);
         //Imgproc.Canny(gray, gray, 50, 200);
-       // List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
-       // Mat hierarchy = new Mat();
+        // List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        // Mat hierarchy = new Mat();
 // find contours:
         Log.d(TAG, "A");
 
         //markers = Mat.zeros(hsvImage.rows(), hsvImage.cols(), CvType.CV_8UC1);
-        //circle(markers, seedPoint, 10, new Scalar(255, 255, 255));
-
+        //circle(markers, currentSeedPoint, 10, new Scalar(255, 255, 255));
 
         Mat gray8 = markers.clone();
         //gray8 = new Mat(markers.size(), CvType.CV_8UC1);
@@ -336,70 +355,107 @@ public class FancyCameraActivity extends Activity implements CameraBridgeViewBas
         Log.d(TAG, "mean: " + mean);
         //Imgproc.adaptiveThreshold(gray8, gray8, 50, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C, Imgproc.THRESH_BINARY, 3, 1);
         //Imgproc.threshold(gray8, gray8, mean.val[0], 255, Imgproc.THRESH_BINARY);
-    /*Imgproc.erode(gray8, gray8, new Mat(), new Point(-1, -1), 2);*/
+        /*Imgproc.erode(gray8, gray8, new Mat(), new Point(-1, -1), 2);*/
 
         Canny(gray8, gray8, 50, 150);
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
         MatOfInt4 hierarchy = new MatOfInt4();
-       // gray8 = Mat.zeros(gray8.rows() + 2, gray8.cols() + 2, CvType.CV_8U);
-        //circle(gray8, seedPoint, 10, new Scalar(255, 255, 255), -1, LINE_4, 0);
-        Imgproc.findContours(gray8, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
+        // gray8 = Mat.zeros(gray8.rows() + 2, gray8.cols() + 2, CvType.CV_8U);
+        //circle(gray8, currentSeedPoint, 10, new Scalar(255, 255, 255), -1, LINE_4, 0);
+        //Imgproc.findContours(gray8, contours, hierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
         //Toast.makeText(getApplicationContext(), contours.size()+" yo", Toast.LENGTH_SHORT).show();
-        //Imgproc.drawContours(hsvImage, contours, 0, new Scalar(0, 255, 255), -1, 1, hierarchy, 5, new org.opencv.core.Point(5,5));
+        //Imgproc.drawContours(clone, contours, 0, new Scalar(0, 255, 255), -1, 1, hierarchy, 5, new org.opencv.core.Point(5,5));
 
-        Log.d(TAG, "contours size: "+ contours.size());
-       for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
-            Imgproc.drawContours(hsvImage, contours, contourIdx, new Scalar(0, 255/(10+contourIdx), 255), 1, 1, hierarchy, 5, new org.opencv.core.Point(0.1,0.1));
-        }
-        gray8.convertTo(gray8, CvType.CV_32S);
+        Log.d(TAG, "contours size: " + contours.size());
+        /*for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
+            MatOfPoint matOfPoint = contours.get(contourIdx);
+            MatOfPoint2f matOfPoint2f = new MatOfPoint2f(matOfPoint.toArray());
+            Imgproc.approxPolyDP(matOfPoint2f, matOfPoint2f, 0.1, true);
+            if (Imgproc.pointPolygonTest(matOfPoint2f, currentSeedPoint, false) >= 0) {
+                matOfPoint = new MatOfPoint(matOfPoint2f.toArray());
+                Imgproc.drawContours(hsvImage, contours, contourIdx, new Scalar(0, 255 / (10 + contourIdx), 255), 1, 1, hierarchy, 5, new org.opencv.core.Point(1, 1));
+            }
+
+        }*/
+   /*     gray8.convertTo(gray8, CvType.CV_32S);
         //Imgproc.watershed(hsvImage, gray8);
         gray8.convertTo(gray8, CvType.CV_8UC1);
-
-        Scalar lowerDifference = new Scalar(2, 2, 2);
-        Scalar upperDifference = new Scalar(2, 2, 2);
-        Scalar newVal = new Scalar(255, 255, 255);
+*/
+        Scalar lowerDifference = new Scalar(20, 20, 20);
+        Scalar upperDifference = new Scalar(20, 20, 20);
+        Scalar newVal = new Scalar(255, 255, 255, 0.6);
 
         Mat mask = Mat.zeros(gray8.rows() + 2, gray8.cols() + 2, CvType.CV_8U);
 
-      /*  Imgproc.floodFill(gray8, mask, seedPoint, newVal, new Rect(), lowerDifference,
+      /*  Imgproc.floodFill(gray8, mask, currentSeedPoint, newVal, new Rect(), lowerDifference,
                 upperDifference, 8 | Imgproc.FLOODFILL_FIXED_RANGE); //flag 4 or 8*//*GaussianBlur
 //    */   // Imgproc.GaussianBlur(hsvImage, hsvImage, new Size(11,11), 6, 6, 0);
         // Imgproc.findContours(gray, contours, hierarchy, Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
 
         Log.d(TAG, "B");
-
+        //Imgproc.pointPolygonTest()
         //for (int contourIdx = 0; contourIdx < contours.size(); contourIdx++) {
-          //  Imgproc.drawContours(laplacian, contours, contourIdx, new Scalar(0, 0, 255), -1);
+        //  Imgproc.drawContours(laplacian, contours, contourIdx, new Scalar(0, 0, 255), -1);
         //}
-        Imgproc.floodFill(hsvImage, mask, seedPoint, newVal, new Rect(), lowerDifference,
-                upperDifference, 8 | Imgproc.FLOODFILL_FIXED_RANGE); //flag 4 or 8*/
-       // Imgproc.watershed(hsvImage, markers);
+        //Canny(clone, clone, 50, 150);
+        //Imgproc.blur(clone, clone, new Size(17, 17));
+        Log.d(TAG, "clone type:" + clone.type());
+
+        clone.convertTo(clone, CvType.CV_8UC1);
+        Log.d(TAG, "clone type:" + clone.type());
+        Log.d(TAG, "clone data:" + clone.dataAddr());
+        // Mat temp = clone.clone();
+        //Imgproc.medianBlur(clone, clone, 13);
+        // Imgproc.bilateralFilter(temp, clone, 1, 80.0, 80.0);
+        Log.d(TAG, "started: " + started);
+
+        Imgproc.erode(clone, clone, new Mat());
+
+        Imgproc.GaussianBlur(clone, clone, new Size(25, 25), 20, 20, 0);
+        Imgproc.blur(clone, clone, new Size(11, 11));
+
+
+        org.opencv.core.Point currPoint = point;
+        Imgproc.floodFill(clone, mask, currPoint, newVal, new Rect(), lowerDifference,
+                upperDifference, 4 | FLOODFILL_MASK_ONLY); //flag 4 or 8
+
+
+        Imgproc.floodFill(clone, mask, currPoint, newVal, new Rect(), lowerDifference,
+                upperDifference, 4 | FLOODFILL_FIXED_RANGE);
+
+        Imgproc.floodFill(hsvImage, mask, currPoint, newVal, new Rect(), lowerDifference,
+                upperDifference, 4 | FLOODFILL_FIXED_RANGE); //flag 4 or 8
+        // Imgproc.watershed(hsvImage, markers);
         Log.d(TAG, "Laplacian type:" + laplacian.type());
         Log.d(TAG, "hsvImage type:" + hsvImage.type());
         Log.d(TAG, "end type:" + end.type());
         Log.d(TAG, "Laplacian channels:" + laplacian.channels());
         Log.d(TAG, "hsvImage channels:" + hsvImage.channels());
         Log.d(TAG, "end channels:" + end.channels());
-       // Imgproc.Laplacian(laplacian, laplacian, CvType.CV_16S, 3, 1, 0, Core.BORDER_DEFAULT);
+        // Imgproc.Laplacian(laplacian, laplacian, CvType.CV_16S, 3, 1, 0, Core.BORDER_DEFAULT);
 
         //Core.addWeighted(hsvImage, 1.5, laplacian, -0.5, 0, end);
 
         //Core.addWeighted(src, 3, hsvImage, 3, 3, end);
         //Core.add(end, hsvImage, end);
-
-       //Imgproc.cvtColor(src, hsvImage, Imgproc.COLOR_HSV2BGR);
-       return hsvImage;
+        //clone.release();
+        mask.release();
+        clone.release();
+        gray8.release();
+        //temp.release();
+        //Imgproc.cvtColor(src, hsvImage, Imgproc.COLOR_HSV2BGR);
+        return hsvImage;
     }
 
 
-
     private int thresold = 2;
-    Scalar getScaler(Scalar seed,boolean plus){
-        if(plus){
-            return new Scalar(seed.val[0]+(seed.val[0]*thresold),seed.val[1]+(seed.val[1]*thresold),seed.val[2]+(seed.val[2]*thresold));
-        }else{
-            return new Scalar(seed.val[0]-(seed.val[0]*thresold),seed.val[1]-(seed.val[1]*thresold),seed.val[2]-(seed.val[2]*thresold));
+
+    Scalar getScaler(Scalar seed, boolean plus) {
+        if (plus) {
+            return new Scalar(seed.val[0] + (seed.val[0] * thresold), seed.val[1] + (seed.val[1] * thresold), seed.val[2] + (seed.val[2] * thresold));
+        } else {
+            return new Scalar(seed.val[0] - (seed.val[0] * thresold), seed.val[1] - (seed.val[1] * thresold), seed.val[2] - (seed.val[2] * thresold));
         }
     }
 

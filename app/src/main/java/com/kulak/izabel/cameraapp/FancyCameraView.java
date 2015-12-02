@@ -2,9 +2,12 @@ package com.kulak.izabel.cameraapp;
 
 
 import android.content.Context;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.Display;
+import android.view.WindowManager;
 
 import org.opencv.android.JavaCameraView;
 
@@ -25,6 +28,20 @@ public class FancyCameraView extends JavaCameraView implements Camera.PictureCal
     }
 
     @Override
+    protected boolean initializeCamera(int w, int h) {
+
+        WindowManager wm = (WindowManager) this.getContext().getSystemService(Context.WINDOW_SERVICE);
+        Display display = wm.getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        int width = size.x;
+        int height = size.y;
+        Log.d(TAG, "INITIALIZE CAMERA width: "+ w + ", height: "+ h);
+        Log.d(TAG, "INITIALIZE CAMERA FROM DISPLAY width: "+ width + ", height: "+ height);
+        return super.initializeCamera(width, height);
+
+    }
+    @Override
     public void onPictureTaken(byte[] data, Camera camera) {
 
         Log.i(TAG, "Saving a bitmap to file");
@@ -43,6 +60,7 @@ public class FancyCameraView extends JavaCameraView implements Camera.PictureCal
         }
 
     }
+
 
     public void takePicture(String fileName) {
         Log.i(TAG, "Take picture");

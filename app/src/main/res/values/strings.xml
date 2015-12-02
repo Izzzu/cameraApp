@@ -9,4 +9,11 @@
     <string name="liveCamera">Live camera</string>
     <string name="fancyCamera">Run fancy cam</string>
     <string name="take_photo">Take a photo</string>
+    <string name="blobDetection">run blob detection</string>
+    <string name="back">back</string>
+    <string name="pick_color">pick_color</string>
+    <string name="select_photo_from_gallery">Select photo from gallery</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="color_picker">Wzornik kolorów</string>
 </resources>

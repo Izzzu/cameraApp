@@ -1,6 +1,12 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools" tools:context=".CameraApp">
-    <item android:id="@+id/action_settings" android:title="@string/action_settings"
-        android:orderInCategory="100" app:showAsAction="never" />
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/back"
+        android:icon="@drawable/back57"
+        android:title="@string/back" />
+    <item android:id="@+id/take_photo"
+        android:icon="@drawable/shutter4"
+        android:title="@string/take_photo" />
+    <item android:id="@+id/pick_color"
+        android:icon="@drawable/painter14"
+        android:title="@string/pick_color" />
 </menu>
