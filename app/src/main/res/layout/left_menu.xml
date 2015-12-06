@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/left_menu"
+    android:layout_width="240dp"
+    android:layout_height="match_parent"
+    android:layout_gravity="start"
+    android:background="#80052150">
+
+    <ImageView
+        android:id="@+id/sniezka_logo"
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:adjustViewBounds="true"
+        android:scaleType="fitXY"
+        android:src="@drawable/sniezka_logo" />
+
+    <TextView
+        android:id="@+id/addWallLive"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_below="@+id/sniezka_logo"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center"
+        android:text="@string/AddWallLive"
+        android:textColor="#ffffff"
+        android:textSize="14sp" />
+
+    <ListView
+        android:id="@+id/nav_menu"
+        android:layout_width="240dp"
+        android:layout_height="200dp"
+        android:layout_below="@+id/addWallLive"
+        android:choiceMode="singleChoice"
+        android:divider="#000"
+        android:dividerHeight="1dp" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/photography_wizualize_item"
+        android:layout_width="240dp"
+        android:layout_height="48dp"
+        android:layout_below="@+id/nav_menu"
+        android:background="#80052150"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp">
+
+        <ImageView
+            android:id="@+id/photography_left_menu_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/transparent"
+            android:src="@drawable/photography111_menu" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/photography_left_menu_icon"
+            android:layout_toRightOf="@+id/photography_left_menu_icon"
+            android:text="Wizualizacja Zdjęcia"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:background="#80041738"
+            android:textSize="12sp"
+            android:textAlignment="gravity" />
+
+    </LinearLayout>
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/live_wizualize_item"
+        android:layout_width="240dp"
+        android:layout_height="48dp"
+        android:layout_below="@+id/photography_wizualize_item"
+        android:background="#80052150"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingBottom="10dp">
+
+        <ImageView
+            android:id="@+id/live_left_menu_icon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/transparent"
+            android:src="@drawable/camera21_menu" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_alignBottom="@+id/live_left_menu_icon"
+            android:layout_toRightOf="@+id/live_left_menu_icon"
+            android:text="Wizualizacja Na Żywo"
+            android:textColor="#ffffff"
+            android:gravity="center"
+            android:background="#80041738"
+            android:textSize="12sp" />
+
+    </LinearLayout>
+</RelativeLayout>

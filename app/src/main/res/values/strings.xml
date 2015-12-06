@@ -16,4 +16,22 @@
     <string name="drawer_open">Open navigation drawer</string>
     <string name="drawer_close">Close navigation drawer</string>
     <string name="color_picker">Wzornik kolorów</string>
+    <string name="AddWallLive">AdWallLive</string>
+
+
+    <!-- Sliding Menu items -->
+    <string-array name="nav_drawer_items">
+        <item>Wzornik kolorów</item>
+        <item>Katalog produktów</item>
+        <item>Znajdź sklep</item>
+        <item>Podpowiedź kolorów</item>
+    </string-array>
+
+    <!-- Sliding Menu item icons -->
+    <array name="nav_drawer_icons">
+        <item>@drawable/painter14_menu</item>
+        <item>@drawable/gear39_menu</item>
+        <item>@drawable/map_pointer2_menu</item>
+        <item>@drawable/view32_menu</item>
+    </array>
 </resources>

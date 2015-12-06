@@ -23,7 +23,6 @@ public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
         super.setUp();
         mLaunchIntent = new Intent(getInstrumentation()
                 .getTargetContext(), StartActivity.class);
-
     }
 
     @MediumTest

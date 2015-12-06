@@ -2,6 +2,7 @@ package com.kulak.izabel.cameraapp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,13 +10,11 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.kulak.izabel.cameraapp.NavDrawerItem;
-import com.kulak.izabel.cameraapp.R;
-
 import java.util.ArrayList;
 
 public class NavDrawerListAdapter extends BaseAdapter {
 
+    private static final String TAG = "NavDrawerListAdapter";
     private Context context;
     private ArrayList<NavDrawerItem> navDrawerItems;
 
@@ -44,26 +43,18 @@ public class NavDrawerListAdapter extends BaseAdapter {
         if (convertView == null) {
             LayoutInflater mInflater = (LayoutInflater)
                     context.getSystemService(Activity.LAYOUT_INFLATER_SERVICE);
-            convertView = mInflater.inflate(R.layout.drawer_list_item, null);
+            convertView = mInflater.inflate(R.layout.nav_list_item, null);
         }
 
-        ImageView imgIcon = (ImageView) convertView.findViewById(R.id.icon);
-        TextView txtTitle = (TextView) convertView.findViewById(R.id.title);
-        TextView txtCount = (TextView) convertView.findViewById(R.id.counter);
+        Log.d(TAG, "convertView: "+ convertView.toString());
+        ImageView imgIcon = (ImageView) convertView.findViewById(R.id.icon_menu_item);
+        TextView txtTitle = (TextView) convertView.findViewById(R.id.text_menu_item);
 
-        imgIcon.setImageResource(navDrawerItems.get(position).getIcon());
-        txtTitle.setText(navDrawerItems.get(position).getTitle());
-
-        // displaying count
-        // check whether it set visible or not
-        if(navDrawerItems.get(position).getCounterVisibility()){
-            txtCount.setText(navDrawerItems.get(position).getCount());
-        }else{
-            // hide the counter view
-            txtCount.setVisibility(View.GONE);
-        }
+        Log.d("NawDrawerItem", "position: "+ position);
+        NavDrawerItem navDrawerItem = navDrawerItems.get(position);
+        imgIcon.setImageResource(navDrawerItem.getIcon());
+        txtTitle.setText(navDrawerItem.getTitle());
 
         return convertView;
     }
-
 }

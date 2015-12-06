@@ -1,6 +1,7 @@
 package com.kulak.izabel.cameraapp;
 
 import android.app.Activity;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -42,6 +43,8 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
 
     private CameraBridgeViewBase mOpenCvCameraView;
 
+    private LeftMenu leftMenu = new LeftMenu(R.id.drawer_layout_blob_detection_activity);
+
     private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -77,6 +80,8 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.blob_camera_preview);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
+        leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
+
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
 
         backButton.setOnClickListener(new View.OnClickListener() {
@@ -109,6 +114,20 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         );
 
 
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+
+        super.onConfigurationChanged(newConfig);
+        leftMenu.changedLeftMenuConfiguration(newConfig);
+    }
+
+    @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        // Sync the toggle state after onRestoreInstanceState has occurred.
+        leftMenu.synchronizeLeftMenuState();
     }
 
     @Override
