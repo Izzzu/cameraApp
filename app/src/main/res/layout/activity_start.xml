@@ -2,52 +2,126 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:and="http://schemas.android.com/tools"
     android:background="#052150"
-    android:orientation="vertical"
-    >
-
+    android:orientation="vertical">
 
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="vertical" >
+        android:orientation="vertical">
 
         <ImageView
+            android:id="@+id/logo"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
-
             android:adjustViewBounds="true"
+
+            android:background="@android:color/transparent"
             android:scaleType="fitXY"
-            android:src="@drawable/logo"/>
+            android:src="@drawable/logo" />
 
-        <ImageButton
-            android:id="@+id/button_run_color_photo"
-
+        <RelativeLayout
             android:layout_width="match_parent"
-
             android:layout_height="222dp"
-            android:layout_gravity="center"
-            android:background="@android:color/transparent"
             android:adjustViewBounds="true"
+            android:gravity="center"
             android:scaleType="fitXY"
-            android:src="@drawable/photo_button"
-            android:text="@string/blobDetection" />
+            android:background="@drawable/live_button"
+            android:orientation="horizontal">
 
-        <ImageButton
-            android:id="@+id/button_run_blob_detection_camera"
+            <ImageButton
+                android:id="@+id/button_run_blob_detection_camera"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:background="@android:color/transparent"
+                android:src="@drawable/camera21"
+                />
 
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:background="#66000000"
+                    android:paddingTop="10dp"
+                    android:layout_marginLeft="20dp"
+                    android:layout_marginRight="20dp"
+                    android:layout_below="@+id/button_run_blob_detection_camera"
+                    android:textSize="18sp"
+                    android:text="Wizualizacja Na Żywo"
+                    android:textColor="#ffffff"
+                    android:id="@+id/textView1"
+                    />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:background="#66000000"
+                android:paddingBottom="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_below="@+id/textView1"
+                android:textSize="12sp"
+                android:text="Dobierz kolory ścian swojego wnętrza na żywo!"
+                android:textColor="#ffffff"
+                android:id="@+id/textView2"
+                />
+
+        </RelativeLayout>
+
+        <RelativeLayout
             android:layout_width="match_parent"
-
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
+            android:layout_height="222dp"
             android:adjustViewBounds="true"
+            android:gravity="center"
             android:scaleType="fitXY"
-            android:background="@android:color/transparent"
-            android:src="@drawable/live_button"
-            android:text="@string/blobDetection" />
+            android:background="@drawable/photo_button"
+            android:orientation="horizontal">
+
+            <ImageButton
+                android:id="@+id/button_run_color_photo"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:background="@android:color/transparent"
+                android:src="@drawable/photography111_menu"
+
+                />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:background="#66000000"
+                android:paddingTop="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_below="@+id/button_run_color_photo"
+                android:textSize="18sp"
+                android:text="Wizualizacja Zdjęcia"
+                android:textColor="#ffffff"
+                android:id="@+id/textView3"
+                />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:background="#66000000"
+                android:paddingBottom="10dp"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
+                android:layout_below="@+id/textView3"
+                android:textSize="12sp"
+                android:text="Pomaluj ściany na swoim zdjęciu"
+                android:textColor="#ffffff"
+                />
+
+        </RelativeLayout>
+
 
 
     </LinearLayout>
