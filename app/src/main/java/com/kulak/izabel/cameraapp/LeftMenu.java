@@ -2,6 +2,7 @@ package com.kulak.izabel.cameraapp;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 
 
 public class LeftMenu {
+    private static final String TAG = "Left menu";
     ActionBarDrawerToggle mDrawerToggle;
 
     DrawerLayout mDrawerLayout;
@@ -99,18 +101,25 @@ public class LeftMenu {
         icons = resources.obtainTypedArray(R.array.nav_drawer_icons);
     }
 
-    void initializeMenuItems(Activity photoActivity) {
-        LinearLayout photography_wizualize_item = (LinearLayout) photoActivity.findViewById(R.id.photography_wizualize_item);
+    void initializeMenuItems(final Activity activity) {
+        LinearLayout photography_wizualize_item = (LinearLayout) activity.findViewById(R.id.photography_wizualize_item);
         photography_wizualize_item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
+                Intent changeActivity = new Intent(activity, PhotoActivity.class);
+                activity.startActivity(changeActivity);
+                mDrawerLayout.closeDrawers();
+
             }
         });
-        LinearLayout live_wizualize_item = (LinearLayout) photoActivity.findViewById(R.id.live_wizualize_item);
+        LinearLayout live_wizualize_item = (LinearLayout) activity.findViewById(R.id.live_wizualize_item);
         live_wizualize_item.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                Intent changeActivity = new Intent(activity, ColorBlobDetectionActivity.class);
+                activity.startActivity(changeActivity);
+                mDrawerLayout.closeDrawers();
 
             }
         });
@@ -124,7 +133,8 @@ public class LeftMenu {
     private void closeDrawer(int position) {
         mDrawerList.setItemChecked(position, true);
         mDrawerList.setSelection(position);
-        mDrawerLayout.closeDrawer(mDrawerList);
+        mDrawerLayout.closeDrawers();
+
     }
 
     void setOnItemClickListener() {
@@ -203,7 +213,7 @@ public class LeftMenu {
     private void displayView(int position) {
         switch (position) {
             case 0:
-// Update selected item and title, then close the drawer
+
                 closeDrawer(position);
                 break;
             case 1:

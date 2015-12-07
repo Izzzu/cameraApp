@@ -1,6 +1,7 @@
 package com.kulak.izabel.cameraapp;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
@@ -87,6 +88,9 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         backButton.setOnClickListener(new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {
+                                                    Intent changeActivity = new Intent(ColorBlobDetectionActivity.this, StartActivity.class);
+                                                    ColorBlobDetectionActivity.this.startActivity(changeActivity);
+
                                                 }
                                             }
         );

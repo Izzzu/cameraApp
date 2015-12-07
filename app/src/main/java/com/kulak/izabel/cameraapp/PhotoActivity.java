@@ -47,6 +47,8 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
         backButton.setOnClickListener(new View.OnClickListener() {
                                           @Override
                                           public void onClick(View v) {
+                                              Intent changeActivity = new Intent(PhotoActivity.this, StartActivity.class);
+                                              PhotoActivity.this.startActivity(changeActivity);
                                           }
                                       }
         );
