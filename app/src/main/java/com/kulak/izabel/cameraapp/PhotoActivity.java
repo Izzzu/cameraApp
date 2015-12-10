@@ -70,6 +70,9 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
         pickColorButton.setOnClickListener(new View.OnClickListener() {
                                                @Override
                                                public void onClick(View v) {
+                                                   Intent changeActivity = new Intent(PhotoActivity.this, ColorPickerActivity.class);
+                                                   PhotoActivity.this.startActivity(changeActivity);
+
                                                }
                                            }
         );

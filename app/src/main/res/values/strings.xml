@@ -17,6 +17,7 @@
     <string name="drawer_close">Close navigation drawer</string>
     <string name="color_picker">Wzornik kolorów</string>
     <string name="AddWallLive">AdWallLive</string>
+    <string name="used_colors">Użyte kolory</string>
 
 
     <!-- Sliding Menu items -->
@@ -34,4 +35,10 @@
         <item>@drawable/map_pointer2_menu</item>
         <item>@drawable/view32_menu</item>
     </array>
+
+    <string-array name="colors_group_titles">
+        <item>Barwy natury</item>
+        <item>Kuchnia Łazienka</item>
+        <item>Śnieżka satynowa</item>
+    </string-array>
 </resources>

@@ -11,7 +11,7 @@ public class StartActivity extends Activity {
     @Override
     public void onCreate(Bundle savedState) {
         super.onCreate(savedState);
-
+        ColorsReader.readColors();
         setContentView(R.layout.activity_start);
 
        /* final Button button = (Button) findViewById(R.id.button_live_camera);

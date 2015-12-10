@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Button xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="83dp"
+    android:layout_height="83dp"
+    android:id="@+id/color_pick_button">
+
+</Button>

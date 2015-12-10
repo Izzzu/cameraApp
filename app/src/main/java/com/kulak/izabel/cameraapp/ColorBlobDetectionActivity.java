@@ -113,7 +113,10 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         pickColorButton.setOnClickListener(new View.OnClickListener() {
                                                @Override
                                                public void onClick(View v) {
-                                                }
+                                                   Intent changeActivity = new Intent(ColorBlobDetectionActivity.this, ColorPickerActivity.class);
+                                                   ColorBlobDetectionActivity.this.startActivity(changeActivity);
+
+                                               }
                                             }
         );
 
