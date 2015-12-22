@@ -7,13 +7,11 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.View.OnTouchListener;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
 import org.opencv.android.BaseLoaderCallback;
-import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.android.LoaderCallbackInterface;
@@ -30,7 +28,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
-public class ColorBlobDetectionActivity extends Activity implements OnTouchListener, CvCameraViewListener2 {
+public class ColorBlobDetectionActivity extends Activity implements View.OnTouchListener, CvCameraViewListener2 {
     private static final String  TAG              = "OCVSample::Activity";
 
     private boolean              mIsColorSelected = false;
@@ -42,7 +40,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
     private Size                 SPECTRUM_SIZE;
     private Scalar               CONTOUR_COLOR;
 
-    private CameraBridgeViewBase mOpenCvCameraView;
+    private FancyCameraView mOpenCvCameraView;
 
     private LeftMenu leftMenu = new LeftMenu(R.id.drawer_layout_blob_detection_activity);
 
@@ -64,6 +62,7 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         }
     };
     private Point touched = null;
+    private static boolean COLOR_PICKER_ON;
 
     public ColorBlobDetectionActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
@@ -78,9 +77,8 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         //getActionBar().setDisplayHomeAsUpEnabled(false);
         setContentView(R.layout.blob_detection_activity);
 
-        mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.blob_camera_preview);
+        mOpenCvCameraView = (FancyCameraView) findViewById(R.id.blob_camera_preview);
         mOpenCvCameraView.setCvCameraViewListener(this);
-
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
 
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
@@ -113,14 +111,16 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         pickColorButton.setOnClickListener(new View.OnClickListener() {
                                                @Override
                                                public void onClick(View v) {
-                                                   Intent changeActivity = new Intent(ColorBlobDetectionActivity.this, ColorPickerActivity.class);
-                                                   ColorBlobDetectionActivity.this.startActivity(changeActivity);
 
+                                                       getFragmentManager()
+                                                               .beginTransaction()
+                                                               .addToBackStack("A")
+                                                               .add(R.id.fragment_place, new ColorPickerActivity())
+                                                               .commit();
+                                                       COLOR_PICKER_ON = true;
                                                }
                                             }
         );
-
-
     }
 
     @Override
@@ -178,7 +178,12 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
         mRgba.release();
     }
 
+
+
+
     public boolean onTouch(View v, MotionEvent event) {
+        closeRightPaneIfItIsOpen();
+
         int cols = mRgba.cols();
         int rows = mRgba.rows();
 
@@ -229,6 +234,14 @@ public class ColorBlobDetectionActivity extends Activity implements OnTouchListe
 
         Imgproc.circle(mRgba, new Point(x,y), 3, new Scalar(255,255,255), -1);
         return false; // don't need subsequent touch events
+    }
+
+    private void closeRightPaneIfItIsOpen() {
+        if (COLOR_PICKER_ON) {
+            getFragmentManager().popBackStack();
+            Log.d(TAG, "On touch");
+            COLOR_PICKER_ON = false;
+        }
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {

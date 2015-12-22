@@ -288,7 +288,6 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
     @Override
     public void onPreviewFrame(byte[] frame, Camera arg1) {
-        Log.d(TAG, "Preview Frame received. Frame size: " + frame.length);
         synchronized (this) {
             mFrameChain[mChainIdx].put(0, 0, frame);
             mCameraFrameReady = true;
@@ -308,7 +307,6 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
         public Mat rgba() {
             Camera.Parameters parameters = mCamera.getParameters();
             int previewFormat = parameters.getPreviewFormat();
-            Log.d(TAG, "mCamera.getParameters().getPreviewFormat():" + previewFormat);
             if (previewFormat == ImageFormat.NV21) {
                 Imgproc.cvtColor(mYuvFrameData, mRgba, Imgproc.COLOR_YUV2RGBA_NV21, 4);
             } else if (previewFormat == ImageFormat.YV12) {

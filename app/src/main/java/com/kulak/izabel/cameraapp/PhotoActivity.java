@@ -5,12 +5,13 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
@@ -27,6 +28,8 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
 
 
     private CharSequence appTitle = "";
+    private static boolean COLOR_PICKER_ON;
+    private String mCurrentPhotoPath;
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -38,8 +41,9 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_photo);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         imageView = (ImageView) findViewById(R.id.selected_photo);
-
+        imageView.setOnTouchListener(PhotoActivity.this);
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
 
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
@@ -56,13 +60,13 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
         final ImageButton pickAPhotoButton = (ImageButton) findViewById(R.id.pick_photo_button);
         //pickAPhotoButton.setLayoutParams(new LinearLayout.LayoutParams(btnSize, btnSize));
         pickAPhotoButton.setOnClickListener(new View.OnClickListener() {
-                                                  @Override
-                                                  public void onClick(View v) {
-                                                      Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                                                      startActivityForResult(intent,SELECT_PICTURE);
+                                                @Override
+                                                public void onClick(View v) {
+                                                    Intent intent = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                                                    startActivityForResult(intent, SELECT_PICTURE);
 
-                                                  }
-                                              }
+                                                }
+                                            }
         );
 
         final ImageButton pickColorButton = (ImageButton) findViewById(R.id.pick_color);
@@ -70,16 +74,19 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
         pickColorButton.setOnClickListener(new View.OnClickListener() {
                                                @Override
                                                public void onClick(View v) {
-                                                   Intent changeActivity = new Intent(PhotoActivity.this, ColorPickerActivity.class);
-                                                   PhotoActivity.this.startActivity(changeActivity);
+                                                   // if (savedInstanceState == null) {
+                                                   getFragmentManager()
+                                                           .beginTransaction()
+                                                           .addToBackStack("A")
+                                                           .add(R.id.fragment_place, new ColorPickerActivity())
+                                                           .commit();
+                                                   COLOR_PICKER_ON = true;
+                                                   // }
 
                                                }
                                            }
         );
-
-
     }
-
 
 
     @Override
@@ -89,13 +96,11 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
     }
 
 
-
     //UPDATED
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode==SELECT_PICTURE && resultCode==RESULT_OK && null !=data)
-        {
+        if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && null != data) {
 
             try {
                 pickAPhoto(data);
@@ -109,15 +114,35 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
 
     private void pickAPhoto(Intent data) throws FileNotFoundException {
         Uri selectedImage = data.getData();
+        mCurrentPhotoPath = selectedImage.getPath();
         InputStream imageStream = getContentResolver().openInputStream(selectedImage);
-        Bitmap selectFile = BitmapFactory.decodeStream(imageStream);
-        Drawable d = new BitmapDrawable(selectFile);
-       // if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            imageView.setImageURI(selectedImage);
-       /* }
-        else {
-            imageView.setImageDrawable(d);
-        }*/
+        //imageView.setImageURI(selectedImage);
+        int targetW = imageView.getWidth();
+        int targetH = imageView.getHeight();
+
+        Log.d(TAG, "targetW " + targetW);
+        Log.d(TAG, "targetH " + targetH);
+        // Get the dimensions of the bitmap
+        BitmapFactory.Options bmOptions = new BitmapFactory.Options();
+        bmOptions.inJustDecodeBounds = true;
+        Log.d(TAG, "A ");
+
+        //BitmapFactory.decodeStream(imageStream, new Rect(), bmOptions);
+        int photoW = bmOptions.outWidth;
+        int photoH = bmOptions.outHeight;
+
+        // Determine how much to scale down the image
+        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        // Decode the image file into a Bitmap sized to fill the View
+        bmOptions.inJustDecodeBounds = false;
+        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inPurgeable = true;
+        Log.d(TAG, "B ");
+        Bitmap bitmap = BitmapFactory.decodeStream(imageStream, new Rect(), bmOptions);
+
+        imageView.setImageBitmap(bitmap);
+
     }
 
     @Override
@@ -129,6 +154,17 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {
+        Log.d(TAG, "On touch!!!");
+        closeRightPaneIfItIsOpen();
         return false;
     }
+
+    private void closeRightPaneIfItIsOpen() {
+        if (COLOR_PICKER_ON) {
+            getFragmentManager().popBackStack();
+            COLOR_PICKER_ON = false;
+            Log.d(TAG, "On touch in IF!!!");
+        }
+    }
+
 }

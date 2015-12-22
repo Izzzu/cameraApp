@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/linearLayout"
     android:layout_width="match_parent"
-
+    android:background="#66000000"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
     android:orientation="horizontal">
@@ -41,4 +41,5 @@
         android:background="@android:color/transparent"
         android:src="@drawable/painter14"
         android:title="@string/pick_color" />
+
 </LinearLayout>
