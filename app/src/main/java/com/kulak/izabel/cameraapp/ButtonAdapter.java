@@ -11,29 +11,32 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 
+import org.opencv.core.Scalar;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class ButtonAdapter extends BaseAdapter {
     private Context mContext;
     private static final String TAG = "ButtonAdapter";
+    private static Scalar scalar;
 
     public ButtonAdapter(Context c) {
         mContext = c;
-        backgroudColors = initializeBackGroundColors();
+        backgroundColors = initializeBackGroundColors();
     }
 
-    private List<Integer> initializeBackGroundColors() {
+    private List<Scalar> initializeBackGroundColors() {
         List<ColorPick> colorPicks = new ColorsReader().getColorPicks();
-        List<Integer> list = new ArrayList<>();
+        List<Scalar> list = new ArrayList<>();
         for (ColorPick pick : colorPicks) {
-            list.add(Color.rgb(pick.r, pick.g, pick.b));
+            list.add(new Scalar((int)pick.r, (int)pick.g, (int)pick.b));
         }
         return list;
     }
 
     public int getCount() {
-        return backgroudColors.size();
+        return backgroundColors.size();
     }
 
     public Object getItem(int position) {
@@ -61,13 +64,23 @@ public class ButtonAdapter extends BaseAdapter {
 
         button.setBackground(drawable);
         GradientDrawable draw = (GradientDrawable) button.getBackground();
-        draw.setColor(backgroudColors.get(position));
+        scalar = backgroundColors.get(position);
+        draw.setColor(Color.rgb((int)scalar.val[0],(int)scalar.val[1], (int)scalar.val[2]) );
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorPickerActivity.setLastPicked(scalar);
+            }
+        });
         //button.setPadding(8, 8, 8, 8);
-
         return button;
     }
 
 
     // references to our images
-    private List<Integer> backgroudColors = new ArrayList<>();
+    private static List<Scalar> backgroundColors = new ArrayList<>();
+
+    public static Scalar getLastPicked() {
+        return scalar;
+    }
 }

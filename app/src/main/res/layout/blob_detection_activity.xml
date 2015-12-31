@@ -4,20 +4,21 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:background="#052150"
-    android:orientation="horizontal"
+    android:orientation="vertical"
     android:layout_weight="1">
 
     <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
+        android:layout_width="fill_parent"
         android:background="#052150"
         android:orientation="vertical">
 
         <com.kulak.izabel.cameraapp.FancyCameraView
             android:id="@+id/blob_camera_preview"
-            android:layout_height="500dp"
+            android:layout_height="fill_parent"
             android:layout_width="fill_parent"
-            android:orientation="horizontal"
+            android:screenOrientation="portrait"
+            android:configChanges="keyboardHidden|orientation"
             android:layout_weight="1" />
 
         <include layout="@layout/bottom_menu_blob_detection_activity"/>

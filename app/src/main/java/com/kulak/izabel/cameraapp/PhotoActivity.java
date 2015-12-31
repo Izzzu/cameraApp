@@ -126,20 +126,36 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
         bmOptions.inJustDecodeBounds = true;
         Log.d(TAG, "A ");
+        Bitmap bitmap = BitmapFactory.decodeStream(imageStream, new Rect(), bmOptions);
+
 
         //BitmapFactory.decodeStream(imageStream, new Rect(), bmOptions);
         int photoW = bmOptions.outWidth;
         int photoH = bmOptions.outHeight;
-
+        Log.d(TAG, "photoW " + photoW);
+        Log.d(TAG, "photoH " + photoH);
+        int scaleFactor = 1;
+        if (photoH > targetH) {
+            scaleFactor = Math.round((float) photoH / (float) targetH);
+        }
+        int expectedWidth = photoW / scaleFactor;
+        if (expectedWidth > targetW) {
+            scaleFactor = Math.round((float) photoW / (float) targetW);
+        }
         // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+        //scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+
+        Log.d(TAG, "scaleFactor-" + scaleFactor);
+        bmOptions.inPreferredConfig = Bitmap.Config.RGB_565;
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
-        bmOptions.inSampleSize = scaleFactor;
+        bmOptions.inSampleSize = 1;
         bmOptions.inPurgeable = true;
         Log.d(TAG, "B ");
-        Bitmap bitmap = BitmapFactory.decodeStream(imageStream, new Rect(), bmOptions);
+        InputStream imageStream2 = getContentResolver().openInputStream(selectedImage);
+
+        bitmap = BitmapFactory.decodeStream(imageStream2, new Rect(), bmOptions);
 
         imageView.setImageBitmap(bitmap);
 
