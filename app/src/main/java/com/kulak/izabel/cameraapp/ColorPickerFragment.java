@@ -17,9 +17,9 @@ import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
 
-public class ColorPickerActivity extends Fragment {
+public class ColorPickerFragment extends Fragment {
 
-    private static final String TAG = "ColorPickerActivity";
+    private static final String TAG = "ColorPickerFragment";
     ArrayList<String> items = new ArrayList<String>();
     ListView topListview;
     ArrayAdapter mAdapter;
@@ -27,8 +27,8 @@ public class ColorPickerActivity extends Fragment {
 
     public static Scalar lastPicked = null;
 
-    public static void setLastPicked(Scalar lastPicked) {
-        ColorPickerActivity.lastPicked = lastPicked;
+    public static synchronized void setLastPicked(Scalar lastPicked) {
+        ColorPickerFragment.lastPicked = lastPicked;
     }
 
 
@@ -59,9 +59,6 @@ public class ColorPickerActivity extends Fragment {
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
                 final String item = (String) parent.getItemAtPosition(position);
-
-                //List<Scalar> backgroundColors = ButtonAdapter.getBackgroundColors();
-                //lastPicked = backgroundColors.get(position);
             }
 
         });
@@ -73,7 +70,7 @@ public class ColorPickerActivity extends Fragment {
 
     }
 
-    public static Scalar getLastPicked() {
+    public static synchronized Scalar getLastPicked() {
         return lastPicked;
     }
 

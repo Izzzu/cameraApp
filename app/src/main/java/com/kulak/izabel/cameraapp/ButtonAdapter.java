@@ -13,6 +13,7 @@ import android.widget.Button;
 
 import org.opencv.core.Scalar;
 
+import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,6 +21,8 @@ public class ButtonAdapter extends BaseAdapter {
     private Context mContext;
     private static final String TAG = "ButtonAdapter";
     private static Scalar scalar;
+    private List<PropertyChangeListener> listener = new ArrayList<PropertyChangeListener>();
+
 
     public ButtonAdapter(Context c) {
         mContext = c;
@@ -49,31 +52,40 @@ public class ButtonAdapter extends BaseAdapter {
 
     // create a new ImageView for each item referenced by the Adapter
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
-    public Button getView(int position, View convertView, ViewGroup parent) {
+    public Button getView(final int position, View convertView, ViewGroup parent) {
         Button button;
 
         // if it's not recycled, initialize some attributes
         button = new Button(mContext);
-        // button.setLayoutParams(new GridView.LayoutParams(80, 80));
+        setButtonBackground(position, button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                scalar = backgroundColors.get(position);
+                ColorPickerFragment.setLastPicked(scalar);
+
+            }
+        });
+        //button.setPadding(8, 8, 8, 8);
+        return button;
+    }
+
+
+
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
+    private void setButtonBackground(int position, Button button) {
         Drawable drawable;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             drawable = (Drawable) mContext.getResources().getDrawable(R.drawable.color_button, mContext.getApplicationContext().getTheme());
         } else {
             drawable = (Drawable) mContext.getResources().getDrawable(R.drawable.color_button);
         }
-
-        button.setBackground(drawable);
-        GradientDrawable draw = (GradientDrawable) button.getBackground();
+        GradientDrawable draw = (GradientDrawable)drawable;
         scalar = backgroundColors.get(position);
-        draw.setColor(Color.rgb((int)scalar.val[0],(int)scalar.val[1], (int)scalar.val[2]) );
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ColorPickerActivity.setLastPicked(scalar);
-            }
-        });
-        //button.setPadding(8, 8, 8, 8);
-        return button;
+
+        draw.setColor(Color.rgb((int) scalar.val[0], (int) scalar.val[1], (int) scalar.val[2]) );
+
+        button.setBackground(draw);
     }
 
 

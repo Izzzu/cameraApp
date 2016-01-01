@@ -10,6 +10,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -63,6 +64,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     };
     private Point touched = null;
     public static boolean COLOR_PICKER_ON;
+    private Scalar pickedColor = null;
+    private ImageView currentColorView;
 
     public ColorBlobDetectionActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
@@ -76,10 +79,11 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         //getActionBar().setDisplayHomeAsUpEnabled(false);
         setContentView(R.layout.blob_detection_activity);
-
+        currentColorView = (ImageView) findViewById(R.id.current_color);
         mOpenCvCameraView = (FancyCameraView) findViewById(R.id.blob_camera_preview);
         mOpenCvCameraView.setCvCameraViewListener(this);
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
+
 
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
 
@@ -115,7 +119,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
                                                        getFragmentManager()
                                                                .beginTransaction()
                                                                .addToBackStack("A")
-                                                               .add(R.id.fragment_place, new ColorPickerActivity())
+                                                               .add(R.id.fragment_place, new ColorPickerFragment())
                                                                .commit();
                                                        COLOR_PICKER_ON = true;
                                                }
@@ -195,8 +199,6 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             int x = (int) event.getX() - xOffset;
             int y = (int) event.getY() - yOffset;
 
-            touched = new Point(x, y);
-
             Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
 
             if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
@@ -241,7 +243,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     }
 
     private boolean colorIsPicked() {
-        return ColorPickerActivity.getLastPicked()!=null;
+        return ColorPickerFragment.getLastPicked()!=null;
     }
 
     public void closeRightPaneIfItIsOpen() {
@@ -260,8 +262,22 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             List<MatOfPoint> contours = mDetector.getContours();
             Mat orig = mRgba.clone();
 
-            Scalar pickedColor = ColorPickerActivity.getLastPicked();
+            //if(pickedColor!=null && !pickedColor.equals(ColorPickerFragment.getLastPicked()))
            // Log.d(TAG, "last picked color: "+ pickedColor.val[0] + "," + pickedColor.val[1] + "," + pickedColor.val[2]);
+            //{
+
+            if (pickedColor!=null && !pickedColor.equals(ColorPickerFragment.getLastPicked())) Log.d(TAG,"picked color: "+ (int)pickedColor.val[0] + ", " + (int)pickedColor.val[1] + ", " + (int)pickedColor.val[2]);
+            pickedColor = ColorPickerFragment.getLastPicked();
+            //currentColorView.setBackgroundColor(Color.rgb((int) pickedColor.val[0], (int) pickedColor.val[1], (int) pickedColor.val[2]));
+
+           // }
+         //   else {
+
+        //        pickedColor = ColorPickerFragment.getLastPicked();
+                //currentColorView.setBackgroundColor(Color.rgb((int) pickedColor.val[0], (int) pickedColor.val[1], (int) pickedColor.val[2]));
+
+        //    }
+
             Imgproc.drawContours(orig, contours, -1, pickedColor, -1);
             Core.addWeighted(orig, 0.4, mRgba, 0.6, 0.0, mRgba);
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
