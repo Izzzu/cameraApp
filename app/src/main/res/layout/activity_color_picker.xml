@@ -66,4 +66,19 @@
             android:textColor="#ffffff"
             android:textSize="18dp" />
     </RelativeLayout>
+
+    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/gridview_last_used_colors"
+        android:paddingRight="12dp"
+        android:paddingLeft="12dp"
+        android:layout_width="fill_parent"
+        android:layout_height="100dp"
+        android:gravity="center"
+        android:numColumns="3"
+        android:verticalSpacing="10dp"
+        android:horizontalSpacing="10dp"
+        android:stretchMode="columnWidth"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="6dp"
+        android:scrollbars="vertical" />
 </LinearLayout>

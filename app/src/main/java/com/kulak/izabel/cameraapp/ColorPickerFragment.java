@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
@@ -16,6 +17,7 @@ import android.widget.ListView;
 import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class ColorPickerFragment extends Fragment {
 
@@ -26,6 +28,10 @@ public class ColorPickerFragment extends Fragment {
     String[] titles;
 
     public static Scalar lastPicked = null;
+    private LastUsedColorsButtonAdapter lastUsedColorsButtonAdapter;
+    private GridView gridview;
+    private GridView gridViewLastUsedColors;
+    private View view;
 
     public static synchronized void setLastPicked(Scalar lastPicked) {
         ColorPickerFragment.lastPicked = lastPicked;
@@ -38,22 +44,39 @@ public class ColorPickerFragment extends Fragment {
 
         super.onCreate(savedInstanceState);
 
-        View view = inflater.inflate(R.layout.activity_color_picker, container, false);
+        view = inflater.inflate(R.layout.activity_color_picker, container, false);
 
+        initTopList(view);
+        initGridWithColorButtons(view);
+
+        initGridWithLastUsedColors(view);
+
+        return view;
+
+    }
+
+
+
+    private void initGridWithLastUsedColors(View view) {
+        gridViewLastUsedColors = (GridView) view.findViewById(R.id.gridview_last_used_colors);
+        lastUsedColorsButtonAdapter = new LastUsedColorsButtonAdapter(getActivity().getApplicationContext(), this);
+        gridViewLastUsedColors.setAdapter(lastUsedColorsButtonAdapter);
+    }
+
+    private void initGridWithColorButtons(View view) {
+       gridview = (GridView) view.findViewById(R.id.gridview);
+        gridview.setAdapter(new ColorPickerButtonAdapter(getActivity().getApplicationContext(), this));
+    }
+
+    private void initTopList(View view) {
         topListview = (ListView) view.findViewById(R.id.colors_group_list);
-        Log.d(TAG,"topListview: "+topListview);
+
         titles = getResources().getStringArray(R.array.colors_group_titles);
 
-        final ArrayList<String> list = new ArrayList<String>();
-        for (int i = 0; i < titles.length; ++i) {
-            list.add(titles[i]);
-        }
-        Log.d(TAG, "getActivity: "+getActivity());
-        Log.d(TAG, "list: "+list.size());
-        mAdapter = new ArrayAdapter(getActivity(), R.layout.color_group_list_item, R.id.color_group_list_item_text, list);
+        mAdapter = new ArrayAdapter(getActivity(), R.layout.color_group_list_item, R.id.color_group_list_item_text, Arrays.asList(titles));
         topListview.setAdapter(mAdapter);
 
-        topListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        topListview.setOnItemClickListener(new OnItemClickListener() {
 
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
@@ -62,12 +85,6 @@ public class ColorPickerFragment extends Fragment {
             }
 
         });
-
-        GridView gridview = (GridView) view.findViewById(R.id.gridview);
-        gridview.setAdapter(new ButtonAdapter(getActivity().getApplicationContext()));
-
-        return view;
-
     }
 
     public static synchronized Scalar getLastPicked() {
@@ -79,8 +96,17 @@ public class ColorPickerFragment extends Fragment {
 
     }
 
-
     protected IActivityEnabledListener aeListener;
+
+    public void updateLastPickedColors() {
+        Log.d(TAG, "invalidate grid");
+        lastUsedColorsButtonAdapter.addToLastUsedColors(lastPicked);
+        lastUsedColorsButtonAdapter.notifyDataSetChanged();
+        //initGridWithLastUsedColors(view);
+        gridViewLastUsedColors.invalidateViews();
+        //view.invalidate();
+        Log.d(TAG, "invalidate all");
+    }
 
     protected interface IActivityEnabledListener{
         void onActivityEnabled(FragmentActivity activity);
