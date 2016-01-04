@@ -21,13 +21,13 @@
             android:scaleType="centerInside" />
 
         <include layout="@layout/bottom_menu_photo_activity"/>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="right"
-            android:id="@+id/fragment_place" />
-    </RelativeLayout>
 
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:id="@+id/fragment_place" />
     <include layout="@layout/left_menu"/>
 
 </android.support.v4.widget.DrawerLayout>

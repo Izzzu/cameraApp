@@ -2,9 +2,9 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="280dp"
     android:layout_height="match_parent"
-    android:layout_gravity="right"
+    android:layout_gravity="end"
     android:orientation="vertical"
-    android:background="#ffffff">
+    android:background="#f2ffffff">
 
     <ListView
         android:id="@+id/colors_group_list"
@@ -30,15 +30,15 @@
         android:horizontalSpacing="10dp"
         android:stretchMode="columnWidth"
         android:layout_marginTop="12dp"
-        android:layout_marginBottom="6dp"
         android:scrollbars="vertical" />
 
     <RelativeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/used_colors_label"
+        android:layout_below="@id/gridview"
         android:layout_width="fill_parent"
         android:layout_height="36dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="6dp"
+        android:layout_marginTop="6dp"
         android:layout_marginRight="12dp"
         android:layout_marginLeft="12dp"
         android:background="#A0A0A0"
@@ -53,7 +53,7 @@
             android:layout_alignParentTop="true"
             android:background="@android:color/transparent"
             android:src="@drawable/painter14"
-            android:layout_marginTop="12dp" />
+             />
 
         <TextView
             android:id="@+id/uzyte_kolory"
@@ -67,18 +67,26 @@
             android:textSize="18dp" />
     </RelativeLayout>
 
-    <GridView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/gridview_last_used_colors"
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
         android:paddingRight="12dp"
         android:paddingLeft="12dp"
-        android:layout_width="fill_parent"
-        android:layout_height="100dp"
-        android:gravity="center"
-        android:numColumns="3"
-        android:verticalSpacing="10dp"
-        android:horizontalSpacing="10dp"
-        android:stretchMode="columnWidth"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="6dp"
-        android:scrollbars="vertical" />
+        android:layout_margin="6dp">
+
+        <GridView xmlns:android="http://schemas.android.com/apk/res/android"
+            android:background="#ffffff"
+            android:padding="9dp"
+            android:layout_below="@+id/used_colors_label"
+            android:id="@+id/gridview_last_used_colors"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:numColumns="5"
+            android:horizontalSpacing="9dp"
+            android:stretchMode="columnWidth"
+            android:scrollbars="vertical" />
+
+    </LinearLayout>
+
 </LinearLayout>

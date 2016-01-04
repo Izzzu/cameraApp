@@ -28,13 +28,14 @@
             android:layout_weight="1" />
 
         <include layout="@layout/bottom_menu_blob_detection_activity"/>
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:gravity="right"
-            android:id="@+id/fragment_place" />
+
     </RelativeLayout>
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:id="@+id/fragment_place" />
     <include layout="@layout/left_menu" />
 
 </android.support.v4.widget.DrawerLayout>

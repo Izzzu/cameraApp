@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="80dp"
+    android:background="#ffffff"
+    >
+
+    <RadioButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Mapa"
+        android:id="@+id/radioButton"
+        android:layout_marginLeft="100dp"
+        android:layout_marginStart="100dp"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:checked="false" />
+
+    <RadioButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lista"
+        android:id="@+id/radioButton2"
+        android:checked="false"
+        android:layout_alignBottom="@+id/radioButton"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginRight="100dp"
+        android:layout_marginEnd="100dp"
+        android:focusable="true"
+        android:fontFamily="Arial" />
+
+    <SearchView
+        android:layout_width="200dp"
+        android:layout_height="fill_parent"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/searchView"
+        android:queryHint="wpisz miasto"
+        android:background="#e5e5e7"
+        android:layout_below="@+id/radioButton"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:iconifiedByDefault="true" />
+</RelativeLayout>

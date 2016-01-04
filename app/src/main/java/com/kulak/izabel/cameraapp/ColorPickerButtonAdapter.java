@@ -60,7 +60,6 @@ public class ColorPickerButtonAdapter extends BaseAdapter implements ButtonAdapt
         return backgroundColors.get(position).hashCode();
     }
 
-
     public View.OnClickListener getOnClickListener(final int position) {
         View.OnClickListener onClickListener = new View.OnClickListener() {
             @Override
@@ -68,6 +67,7 @@ public class ColorPickerButtonAdapter extends BaseAdapter implements ButtonAdapt
                 currentColor = backgroundColors.get(position);
                 ColorPickerFragment.setLastPicked(currentColor);
                 colorPickerFragment.updateLastPickedColors();
+                colorPickerFragment.closeDrawer();
             }
         };
         return onClickListener;

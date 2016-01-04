@@ -2,8 +2,12 @@ package com.kulak.izabel.cameraapp;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,9 +36,67 @@ public class ColorPickerFragment extends Fragment {
     private GridView gridview;
     private GridView gridViewLastUsedColors;
     private View view;
+    private int layout_id;
+
+    ActionBarDrawerToggle mDrawerToggle;
+    DrawerLayout mDrawerLayout;
+
+    public ColorPickerFragment(int layout_id, final Activity activity) {
+        super();
+        this.layout_id = layout_id;
+        mDrawerLayout = (DrawerLayout) activity.findViewById(layout_id);
+        mDrawerToggle = new ActionBarDrawerToggle(activity, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+
+            /**
+             * Called when a drawer has settled in a completely open state.
+             */
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                ((ColorPickerOwner)activity).openColorPickerFragment();
+                activity.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+
+            /**
+             * Called when a drawer has settled in a completely closed state.
+             */
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                activity.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
+            }
+        };
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+    }
+
+    void changedMenuConfiguration(Configuration newConfig) {
+        mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    void synchronizeMenuState() {
+        mDrawerToggle.syncState();
+    }
+
+    public ColorPickerFragment() {
+        super();
+    }
 
     public static synchronized void setLastPicked(Scalar lastPicked) {
         ColorPickerFragment.lastPicked = lastPicked;
+    }
+
+    public ActionBarDrawerToggle getmDrawerToggle() {
+        return mDrawerToggle;
+    }
+
+    public void setmDrawerToggle(ActionBarDrawerToggle mDrawerToggle) {
+        this.mDrawerToggle = mDrawerToggle;
+    }
+
+    public DrawerLayout getmDrawerLayout() {
+        return mDrawerLayout;
+    }
+
+    public void setmDrawerLayout(DrawerLayout mDrawerLayout) {
+        this.mDrawerLayout = mDrawerLayout;
     }
 
 
@@ -43,19 +105,20 @@ public class ColorPickerFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-
         view = inflater.inflate(R.layout.activity_color_picker, container, false);
-
         initTopList(view);
         initGridWithColorButtons(view);
-
         initGridWithLastUsedColors(view);
-
         return view;
-
     }
 
+    public void closeDrawer() {
+        mDrawerLayout.closeDrawers();
+    }
 
+    public void openDrawer() {
+        mDrawerLayout.openDrawer(GravityCompat.END);
+    }
 
     private void initGridWithLastUsedColors(View view) {
         gridViewLastUsedColors = (GridView) view.findViewById(R.id.gridview_last_used_colors);
@@ -83,7 +146,6 @@ public class ColorPickerFragment extends Fragment {
                                     int position, long id) {
                 final String item = (String) parent.getItemAtPosition(position);
             }
-
         });
     }
 
@@ -93,7 +155,6 @@ public class ColorPickerFragment extends Fragment {
 
     public void closeColorPicker() {
         ((ColorBlobDetectionActivity)getActivity()).closeRightPaneIfItIsOpen();
-
     }
 
     protected IActivityEnabledListener aeListener;

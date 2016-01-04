@@ -24,6 +24,7 @@ public class LastUsedColorsButtonAdapter extends BaseAdapter implements ButtonAd
     private static List<Scalar> lastUsedColors;
     private LastUsedColorsButtonAdapter adapter = this;
     private Scalar currentColor;
+    private static final int LAST_USED_COLORS_IN_ROW = 5;
 
     public LastUsedColorsButtonAdapter(Context c, ColorPickerFragment colorPickerFragment) {
         super();
@@ -47,8 +48,6 @@ public class LastUsedColorsButtonAdapter extends BaseAdapter implements ButtonAd
         return lastUsedColors.get(position).hashCode();
     }
 
-
-
     @Override
     public View.OnClickListener getOnClickListener(final int position) {
         return new View.OnClickListener() {
@@ -57,6 +56,7 @@ public class LastUsedColorsButtonAdapter extends BaseAdapter implements ButtonAd
                 currentColor = lastUsedColors.get(position);
                 ColorPickerFragment.setLastPicked(currentColor);
                 colorPickerFragment.updateLastPickedColors();
+                colorPickerFragment.closeDrawer();
             }
         };
     }
@@ -65,43 +65,34 @@ public class LastUsedColorsButtonAdapter extends BaseAdapter implements ButtonAd
     public Button getView(final int position, View convertView, ViewGroup parent) {
 
         Button button;
-       // if(convertView == null) {
-
-            // if it's not recycled, initialize some attributes
             button = new Button(mContext);
             setButtonBackground(position, button);
-
             button.setOnClickListener(getOnClickListener(position));
-            //button.setPadding(8, 8, 8, 8);
-
         return button;
     }
-
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     @Override
     public void setButtonBackground(int position, Button button) {
         Drawable drawable;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            drawable = (Drawable) mContext.getResources().getDrawable(R.drawable.color_button, mContext.getApplicationContext().getTheme());
+            drawable = (Drawable) mContext.getResources().getDrawable(R.drawable.last_used_color_button, mContext.getApplicationContext().getTheme());
         } else {
-            drawable = (Drawable) mContext.getResources().getDrawable(R.drawable.color_button);
+            drawable = (Drawable) mContext.getResources().getDrawable(R.drawable.last_used_color_button);
         }
         GradientDrawable draw = (GradientDrawable) drawable;
         currentColor = lastUsedColors.get(position);
         draw.setColor(Color.rgb((int) currentColor.val[0], (int) currentColor.val[1], (int) currentColor.val[2]));
-
         button.setBackground(draw);
     }
 
     public void addToLastUsedColors(Scalar currentColor) {
         lastUsedColors.add(currentColor);
-        if (lastUsedColors.size()>3) {
-            for (int i = 0; i < lastUsedColors.size()-3; i++) {
+        if (lastUsedColors.size()> LAST_USED_COLORS_IN_ROW) {
+            for (int i = 0; i < lastUsedColors.size()- LAST_USED_COLORS_IN_ROW; i++) {
                 lastUsedColors.remove(i);
             }
         }
         adapter.notifyDataSetChanged();
-
     }
 }

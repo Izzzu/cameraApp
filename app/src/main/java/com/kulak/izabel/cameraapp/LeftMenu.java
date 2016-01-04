@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.View;
@@ -94,6 +95,7 @@ public class LeftMenu {
         navDrawerItems.add(new NavDrawerItem(titles[1], icons.getResourceId(1, -1)));
         navDrawerItems.add(new NavDrawerItem(titles[2], icons.getResourceId(2, -1)));
         navDrawerItems.add(new NavDrawerItem(titles[3], icons.getResourceId(3, -1)));
+        navDrawerItems.add(new NavDrawerItem(titles[4], icons.getResourceId(4, -1)));
     }
 
     void initializeMenuListResources(Resources resources) {
@@ -120,7 +122,6 @@ public class LeftMenu {
                 Intent changeActivity = new Intent(activity, ColorBlobDetectionActivity.class);
                 activity.startActivity(changeActivity);
                 mDrawerLayout.closeDrawers();
-
             }
         });
     }
@@ -137,8 +138,8 @@ public class LeftMenu {
 
     }
 
-    void setOnItemClickListener() {
-        mDrawerList.setOnItemClickListener(new SlideMenuClickListener());
+    void setOnItemClickListener(Activity activity) {
+        mDrawerList.setOnItemClickListener(new SlideMenuClickListener(activity));
     }
 
     void recycleIcons() {
@@ -153,12 +154,13 @@ public class LeftMenu {
     void setUpDrawer(final Activity activity) {
         mDrawerToggle = new ActionBarDrawerToggle(activity, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
 
+
             /**
              * Called when a drawer has settled in a completely open state.
              */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                //getActionBar().setTitle("Navigation!");
+                closeDrawer(GravityCompat.END);
                 activity.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
@@ -167,7 +169,6 @@ public class LeftMenu {
              */
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
-                //getActionBar().setTitle(mActivityTitle);
                 activity.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
         };
@@ -181,7 +182,7 @@ public class LeftMenu {
         initializeMenuItems(activity);
 
         recycleIcons();
-        setOnItemClickListener();
+        setOnItemClickListener(activity);
         settingUpAdapter(context);
         setUpDrawer(activity);
 
@@ -201,28 +202,38 @@ public class LeftMenu {
      * Slide menu item click listener *
      */
     private class SlideMenuClickListener implements ListView.OnItemClickListener {
+        private final Activity activity;
+
+        public SlideMenuClickListener(Activity activity) {
+            this.activity = activity;
+        }
+
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             // Display appropriate fragment for selected item
-            displayView(position);
+            displayView(position, activity);
 
         }
     }
 
 
-    private void displayView(int position) {
+    private void displayView(int position, Activity activity) {
         switch (position) {
             case 0:
-
                 closeDrawer(position);
                 break;
             case 1:
                 closeDrawer(position);
                 break;
             case 2:
-                closeDrawer(position);
+                Intent changeActivity = new Intent(activity, MapActivity.class);
+                activity.startActivity(changeActivity);
+                mDrawerLayout.closeDrawers();
                 break;
             case 3:
+                closeDrawer(position);
+                break;
+            case 4:
                 closeDrawer(position);
                 break;
             default:

@@ -30,7 +30,7 @@ import org.opencv.imgproc.Imgproc;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
-public class PhotoActivity extends Activity implements View.OnTouchListener {
+public class PhotoActivity extends Activity implements View.OnTouchListener, ColorPickerOwner {
 
     private static final int SELECT_PICTURE = 1;
     private final LeftMenu leftMenu = new LeftMenu(R.id.drawer_layout_photo_activity);
@@ -56,13 +56,16 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
             }
         }
     };
+    private ColorPickerFragment rightFragment;
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
 
         super.onConfigurationChanged(newConfig);
         leftMenu.changedLeftMenuConfiguration(newConfig);
+        rightFragment.onConfigurationChanged(newConfig);
     }
+
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -78,6 +81,8 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
         imageView = (ImageView) findViewById(R.id.selected_photo);
         imageView.setOnTouchListener(PhotoActivity.this);
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
+        rightFragment = new ColorPickerFragment(R.id.drawer_layout_photo_activity, this);
+
 
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
 
@@ -108,12 +113,7 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
                                                @Override
                                                public void onClick(View v) {
                                                    // if (savedInstanceState == null) {
-                                                   getFragmentManager()
-                                                           .beginTransaction()
-                                                           .addToBackStack("A")
-                                                           .add(R.id.fragment_place, new ColorPickerFragment())
-                                                           .commit();
-                                                   COLOR_PICKER_ON = true;
+
                                                    // }
 
                                                }
@@ -240,8 +240,6 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
-
-            // imageView.setImageBitmap(BitmapFactory.decodeFile(path));
         }
     }
 
@@ -299,15 +297,27 @@ public class PhotoActivity extends Activity implements View.OnTouchListener {
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
         leftMenu.synchronizeLeftMenuState();
+        rightFragment.synchronizeMenuState();
+
     }
 
 
     private void closeRightPaneIfItIsOpen() {
-        if (COLOR_PICKER_ON) {
-            getFragmentManager().popBackStack();
-            COLOR_PICKER_ON = false;
-            Log.d(TAG, "On touch in IF!!!");
+        closeColorPickerFragment();
+    }
+
+    public void openColorPickerFragment(){
+        if (COLOR_PICKER_ON != true) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack("A")
+                    .add(R.id.fragment_place, rightFragment)
+                    .commit();
+            COLOR_PICKER_ON = true;
         }
     }
 
+    public void closeColorPickerFragment(){
+        rightFragment.closeDrawer();
+    }
 }

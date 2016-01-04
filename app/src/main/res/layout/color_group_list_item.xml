@@ -6,7 +6,7 @@
         android:layout_height="36dp"
         android:layout_marginBottom="6dp"
         android:background="#A0A0A0"
-        android:paddingTop="6dp">
+        android:padding="6dp">
 
         <ImageView
             android:id="@+id/color_group_list_item_icon"

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,7 +30,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.util.List;
 
-public class ColorBlobDetectionActivity extends FragmentActivity implements View.OnTouchListener, CvCameraViewListener2 {
+public class ColorBlobDetectionActivity extends FragmentActivity implements View.OnTouchListener, CvCameraViewListener2, ColorPickerOwner {
     private static final String  TAG              = "OCVSample::Activity";
 
     private boolean              mIsColorSelected = false;
@@ -44,6 +45,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     private FancyCameraView mOpenCvCameraView;
 
     private LeftMenu leftMenu = new LeftMenu(R.id.drawer_layout_blob_detection_activity);
+
+
 
     private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
@@ -66,6 +69,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     public static boolean COLOR_PICKER_ON;
     private Scalar pickedColor = null;
     private ImageView currentColorView;
+    private DrawerLayout rightDrawerLayout;
+    private ColorPickerFragment rightFragment;
 
     public ColorBlobDetectionActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
@@ -83,7 +88,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         mOpenCvCameraView = (FancyCameraView) findViewById(R.id.blob_camera_preview);
         mOpenCvCameraView.setCvCameraViewListener(this);
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
-
+        rightFragment = new ColorPickerFragment(R.id.drawer_layout_blob_detection_activity, this);
 
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
 
@@ -116,15 +121,26 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
                                                @Override
                                                public void onClick(View v) {
 
-                                                       getFragmentManager()
-                                                               .beginTransaction()
-                                                               .addToBackStack("A")
-                                                               .add(R.id.fragment_place, new ColorPickerFragment())
-                                                               .commit();
-                                                       COLOR_PICKER_ON = true;
+
                                                }
                                             }
         );
+    }
+
+    public void openColorPickerFragment(){
+        if (COLOR_PICKER_ON != true) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack("A")
+                    .add(R.id.fragment_place, rightFragment)
+                    .commit();
+            COLOR_PICKER_ON = true;
+        }
+
+    }
+
+    public void closeColorPickerFragment(){
+        rightFragment.closeDrawer();
     }
 
     @Override
@@ -132,6 +148,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
 
         super.onConfigurationChanged(newConfig);
         leftMenu.changedLeftMenuConfiguration(newConfig);
+        rightFragment.changedMenuConfiguration(newConfig);
     }
 
     @Override
@@ -139,6 +156,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         super.onPostCreate(savedInstanceState);
         // Sync the toggle state after onRestoreInstanceState has occurred.
         leftMenu.synchronizeLeftMenuState();
+        rightFragment.synchronizeMenuState();
     }
 
     @Override
@@ -247,11 +265,12 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     }
 
     public void closeRightPaneIfItIsOpen() {
-        if (COLOR_PICKER_ON) {
+        /*if (COLOR_PICKER_ON) {
             getFragmentManager().popBackStack();
             Log.d(TAG, "On touch");
             COLOR_PICKER_ON = false;
-        }
+        }*/
+        rightFragment.closeDrawer();
     }
 
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {

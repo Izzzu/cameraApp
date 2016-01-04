@@ -26,6 +26,7 @@
         <item>Katalog produktów</item>
         <item>Znajdź sklep</item>
         <item>Podpowiedź kolorów</item>
+        <item>Kalkulator zużycia farby</item>
     </string-array>
 
     <!-- Sliding Menu item icons -->
@@ -33,6 +34,7 @@
         <item>@drawable/painter14_menu</item>
         <item>@drawable/gear39_menu</item>
         <item>@drawable/map_pointer2_menu</item>
+        <item>@drawable/view32_menu</item>
         <item>@drawable/view32_menu</item>
     </array>
 
