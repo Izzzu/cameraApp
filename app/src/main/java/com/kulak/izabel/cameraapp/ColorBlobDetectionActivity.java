@@ -163,6 +163,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     public void onPause()
     {
         super.onPause();
+        Log.d(TAG, "onPause");
+        COLOR_PICKER_ON = false;
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }
@@ -171,6 +173,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     public void onResume()
     {
         super.onResume();
+        Log.d(TAG, "onResume");
+
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
@@ -182,6 +186,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
 
     public void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "onDestroy");
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
     }
@@ -200,12 +205,10 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         mRgba.release();
     }
 
-
-
-
-
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
-        closeRightPaneIfItIsOpen();
+
+        closeColorPickerFragment();
 
         if (colorIsPicked()) {
             int cols = mRgba.cols();
@@ -265,14 +268,11 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     }
 
     public void closeRightPaneIfItIsOpen() {
-        /*if (COLOR_PICKER_ON) {
-            getFragmentManager().popBackStack();
-            Log.d(TAG, "On touch");
-            COLOR_PICKER_ON = false;
-        }*/
-        rightFragment.closeDrawer();
+
+        closeColorPickerFragment();
     }
 
+    @Override
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
 
@@ -281,29 +281,16 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             List<MatOfPoint> contours = mDetector.getContours();
             Mat orig = mRgba.clone();
 
-            //if(pickedColor!=null && !pickedColor.equals(ColorPickerFragment.getLastPicked()))
-           // Log.d(TAG, "last picked color: "+ pickedColor.val[0] + "," + pickedColor.val[1] + "," + pickedColor.val[2]);
-            //{
 
             if (pickedColor!=null && !pickedColor.equals(ColorPickerFragment.getLastPicked())) Log.d(TAG,"picked color: "+ (int)pickedColor.val[0] + ", " + (int)pickedColor.val[1] + ", " + (int)pickedColor.val[2]);
             pickedColor = ColorPickerFragment.getLastPicked();
-            //currentColorView.setBackgroundColor(Color.rgb((int) pickedColor.val[0], (int) pickedColor.val[1], (int) pickedColor.val[2]));
-
-           // }
-         //   else {
-
-        //        pickedColor = ColorPickerFragment.getLastPicked();
-                //currentColorView.setBackgroundColor(Color.rgb((int) pickedColor.val[0], (int) pickedColor.val[1], (int) pickedColor.val[2]));
-
-        //    }
 
             Imgproc.drawContours(orig, contours, -1, pickedColor, -1);
             Core.addWeighted(orig, 0.4, mRgba, 0.6, 0.0, mRgba);
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(pickedColor);
 
-           // Mat spectrumLabel = mRgba.submat(4, 4 + mSpectrum.rows(), 70, 70 + mSpectrum.cols());
-            //mSpectrum.copyTo(spectrumLabel);
+
         }
 
 

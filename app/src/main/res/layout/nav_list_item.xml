@@ -4,8 +4,8 @@
     android:paddingLeft="10dp"
     android:paddingRight="10dp"
     android:paddingTop="5dp"
-    android:background="#002051"
-    >
+    android:background="#002051">
+
     <ImageView
         android:id="@+id/icon_menu_item"
         android:layout_width="32dp"
@@ -21,6 +21,5 @@
         android:layout_alignBottom="@+id/icon_menu_item"
         android:layout_toRightOf="@+id/icon_menu_item"
         android:layout_marginLeft="10dp"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 </RelativeLayout>

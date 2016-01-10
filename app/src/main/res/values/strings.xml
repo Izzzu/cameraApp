@@ -18,6 +18,7 @@
     <string name="color_picker">Wzornik kolorów</string>
     <string name="AddWallLive">AdWallLive</string>
     <string name="used_colors">Użyte kolory</string>
+    <string name="calculator_description">Calculation based on one coat only. Two coats generally recommended. Additional coats may be required dependent on surface porosity and depth of colour.</string>
 
 
     <!-- Sliding Menu items -->
@@ -34,13 +35,41 @@
         <item>@drawable/painter14_menu</item>
         <item>@drawable/gear39_menu</item>
         <item>@drawable/map_pointer2_menu</item>
-        <item>@drawable/view32_menu</item>
-        <item>@drawable/view32_menu</item>
+        <item>@drawable/pipette2_menu</item>
+        <item>@drawable/calculator69_menu</item>
     </array>
 
     <string-array name="colors_group_titles">
         <item>Barwy natury</item>
         <item>Kuchnia Łazienka</item>
         <item>Śnieżka satynowa</item>
+    </string-array>
+
+    <string-array name="spinner_ext_or_int">
+        <item>Mercury</item>
+        <item>Venus</item>
+        <item>Earth</item>
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
+
+    <string-array name="spinner_type_of_surface">
+
+        <item>Mars</item>
+        <item>Jupiter</item>
+        <item>Saturn</item>
+        <item>Uranus</item>
+        <item>Neptune</item>
+    </string-array>
+
+    <string-array name="spinner_paint_type">
+        <item>Mercury</item>
+        <item>Venus</item>
+        <item>Earth</item>
+        <item>Mars</item>
+
     </string-array>
 </resources>

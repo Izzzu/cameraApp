@@ -9,10 +9,13 @@ import android.content.res.TypedArray;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+
+import com.kulak.izabel.cameraapp.activity.CalculatorActivity;
 
 import java.util.ArrayList;
 
@@ -28,7 +31,6 @@ public class LeftMenu {
     String[] titles;
     TypedArray icons;
     private int layout_id;
-
 
     public LeftMenu(int layout_id) {
         this.layout_id = layout_id;
@@ -160,7 +162,7 @@ public class LeftMenu {
              */
             public void onDrawerOpened(View drawerView) {
                 super.onDrawerOpened(drawerView);
-                closeDrawer(GravityCompat.END);
+               // closeDrawer(GravityCompat.END);
                 activity.invalidateOptionsMenu(); // creates call to onPrepareOptionsMenu()
             }
 
@@ -174,7 +176,7 @@ public class LeftMenu {
         };
     }
 
-    void initializeLeftMenu(Resources resources, Context context, Activity activity) {
+    public void initializeLeftMenu(Resources resources, Context context, Activity activity) {
         findLeftMenuElementsInLayout(activity);
 
         initializeMenuListResources(resources);
@@ -186,17 +188,27 @@ public class LeftMenu {
         settingUpAdapter(context);
         setUpDrawer(activity);
 
+        if(mDrawerToggle == null) {
+            Log.d(TAG, "mDrawerToggle is null");
+        }
+
+        if(mDrawerLayout == null) {
+            Log.d(TAG, "mDrawerLayout is null");
+        }
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    void changedLeftMenuConfiguration(Configuration newConfig) {
+    public void changedLeftMenuConfiguration(Configuration newConfig) {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    void synchronizeLeftMenuState() {
+    public void synchronizeLeftMenuState() {
         mDrawerToggle.syncState();
     }
 
+    public void openDrawer() {
+        mDrawerLayout.openDrawer(GravityCompat.START);
+    }
 
     /**
      * Slide menu item click listener *
@@ -216,8 +228,8 @@ public class LeftMenu {
         }
     }
 
-
     private void displayView(int position, Activity activity) {
+        Intent changeActivity;
         switch (position) {
             case 0:
                 closeDrawer(position);
@@ -226,7 +238,7 @@ public class LeftMenu {
                 closeDrawer(position);
                 break;
             case 2:
-                Intent changeActivity = new Intent(activity, MapActivity.class);
+                changeActivity = new Intent(activity, MapActivity.class);
                 activity.startActivity(changeActivity);
                 mDrawerLayout.closeDrawers();
                 break;
@@ -234,7 +246,9 @@ public class LeftMenu {
                 closeDrawer(position);
                 break;
             case 4:
-                closeDrawer(position);
+                changeActivity = new Intent(activity, CalculatorActivity.class);
+                activity.startActivity(changeActivity);
+                mDrawerLayout.closeDrawers();
                 break;
             default:
                 break;

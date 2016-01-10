@@ -6,6 +6,8 @@ import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,6 +24,7 @@ import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
@@ -29,6 +32,7 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.List;
 
 public class PhotoActivity extends Activity implements View.OnTouchListener, ColorPickerOwner {
 
@@ -49,14 +53,15 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         public void onManagerConnected(int status) {
             switch (status) {
 
-                default:
-                {
+                default: {
                     super.onManagerConnected(status);
-                } break;
+                }
+                break;
             }
         }
     };
     private ColorPickerFragment rightFragment;
+    private Scalar pickedColor = null;
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -126,12 +131,11 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         mBlobColorRgba = new Scalar(255);
         mBlobColorHsv = new Scalar(255);
         SPECTRUM_SIZE = new Size(200, 64);
-        CONTOUR_COLOR = new Scalar(255,255,0);
+        CONTOUR_COLOR = new Scalar(255, 255, 0);
     }
 
     @Override
-    public void onResume()
-    {
+    public void onResume() {
         super.onResume();
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
@@ -149,19 +153,25 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         getActionBar().setTitle(appTitle);
     }
 
-    private boolean              mIsColorSelected = false;
-    private Mat                  mRgba;
-    private Scalar               mBlobColorRgba;
-    private Scalar               mBlobColorHsv;
+    private boolean mIsColorSelected = false;
+    private Mat mRgba;
+    private Scalar mBlobColorRgba;
+    private Scalar mBlobColorHsv;
     private ColorBlobDetector mDetector;
-    private Mat                  mSpectrum;
+    private Mat mSpectrum;
     private Size SPECTRUM_SIZE;
-    private Scalar               CONTOUR_COLOR;
+    private Scalar CONTOUR_COLOR;
 
+    @Override
     public boolean onTouch(View v, MotionEvent event) {
-        closeRightPaneIfItIsOpen();
+        closeColorPickerFragment();
 
-        if (colorIsPicked()) {
+        if (colorIsPicked() && mIsColorSelected) {
+            Log.d(TAG, "Color is picked");
+            Drawable imgDrawable = ((ImageView)imageView).getDrawable();
+            bitmap = ((BitmapDrawable)imgDrawable).getBitmap();
+            Utils.bitmapToMat(bitmap,mRgba);
+
             int cols = mRgba.cols();
             int rows = mRgba.rows();
 
@@ -170,7 +180,6 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
 
             int x = (int) event.getX() - xOffset;
             int y = (int) event.getY() - yOffset;
-
 
             Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
 
@@ -209,16 +218,33 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
             touchedRegionRgba.release();
             touchedRegionHsv.release();
 
-            Imgproc.circle(mRgba, new Point(x, y), 3, new Scalar(255, 255, 255), -1);
-            Utils.matToBitmap(mRgba, bitmap);
-            imageView.setImageBitmap(bitmap);
+            mDetector.process(mRgba);
+            List<MatOfPoint> contours = mDetector.getContours();
+            Mat orig = mRgba.clone();
 
+            if (pickedColor != null && !pickedColor.equals(ColorPickerFragment.getLastPicked()))
+                Log.d(TAG, "picked color: " + (int) pickedColor.val[0] + ", " + (int) pickedColor.val[1] + ", " + (int) pickedColor.val[2]);
+            pickedColor = ColorPickerFragment.getLastPicked();
+
+            Imgproc.drawContours(orig, contours, -1, pickedColor, -1);
+            Core.addWeighted(orig, 0.4, mRgba, 0.6, 0.0, mRgba);
+            Mat colorLabel = mRgba.submat(4, 68, 4, 68);
+            colorLabel.setTo(pickedColor);
+
+            Imgproc.circle(mRgba, new Point(x, y), 3, new Scalar(255, 255, 255), -1);
+            Log.d(TAG, "Mat to bitmap");
+            Utils.matToBitmap(mRgba, bitmap);
+            Log.d(TAG, "Set image bitmap");
+            imageView.setImageBitmap(bitmap);
+            Log.d(TAG, "Invalidate");
+            imageView.invalidate();
+            Log.d(TAG, "Invalidating done");
         }
         return false; // don't need subsequent touch events
     }
 
     private boolean colorIsPicked() {
-        return ColorPickerFragment.getLastPicked()!=null;
+        return ColorPickerFragment.getLastPicked() != null;
     }
 
     private Scalar convertScalarHsv2Rgba(Scalar hsvColor) {
@@ -234,13 +260,19 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == SELECT_PICTURE && resultCode == RESULT_OK && null != data) {
-
             try {
                 pickAPhoto(data);
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (bitmap != null)
+            bitmap.recycle();
     }
 
     private void pickAPhoto(Intent data) throws FileNotFoundException {
@@ -258,7 +290,6 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         bmOptions.inJustDecodeBounds = true;
         Log.d(TAG, "A ");
         bitmap = BitmapFactory.decodeStream(imageStream, new Rect(), bmOptions);
-
 
         //BitmapFactory.decodeStream(imageStream, new Rect(), bmOptions);
         int photoW = bmOptions.outWidth;
@@ -289,7 +320,6 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         bitmap = BitmapFactory.decodeStream(imageStream2, new Rect(), bmOptions);
 
         imageView.setImageBitmap(bitmap);
-
     }
 
     @Override
@@ -298,15 +328,13 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         // Sync the toggle state after onRestoreInstanceState has occurred.
         leftMenu.synchronizeLeftMenuState();
         rightFragment.synchronizeMenuState();
-
     }
-
 
     private void closeRightPaneIfItIsOpen() {
         closeColorPickerFragment();
     }
 
-    public void openColorPickerFragment(){
+    public void openColorPickerFragment() {
         if (COLOR_PICKER_ON != true) {
             getFragmentManager()
                     .beginTransaction()
@@ -317,7 +345,17 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         }
     }
 
-    public void closeColorPickerFragment(){
-        rightFragment.closeDrawer();
+    @Override
+    public void onPause() {
+        super.onPause();
+        COLOR_PICKER_ON = false;
+
     }
+
+    @Override
+    public void closeColorPickerFragment() {
+        rightFragment.closeDrawer();
+
+    }
+
 }
