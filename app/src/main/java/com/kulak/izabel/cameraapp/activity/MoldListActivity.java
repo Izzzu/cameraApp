@@ -22,17 +22,21 @@ public class MoldListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mold_list_activity);
 
-        verticalSeekBar = (VerticalSeekBar) findViewById(R.id.seekBar);
-        listOfMolds = (ListView) findViewById(R.id.mold_list);
-
         ArrayList<ColorMoldListItem> moldListItems = new ArrayList<>();
         populateColorMoldListItems(moldListItems);
 
 
+        VerticalSeekBar.setBarLength(moldListItems.size());
+        verticalSeekBar = (VerticalSeekBar) findViewById(R.id.seekBar);
+        listOfMolds = (ListView) findViewById(R.id.mold_list);
+
+
+
         MoldItemListAdapter adapter = new MoldItemListAdapter(getApplicationContext(), moldListItems);
+
         listOfMolds.setAdapter(adapter);
 
-        
+
     }
 
     private void populateColorMoldListItems(ArrayList<ColorMoldListItem> moldListItems) {

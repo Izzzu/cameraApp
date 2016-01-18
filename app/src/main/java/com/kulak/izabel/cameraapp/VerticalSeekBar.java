@@ -9,6 +9,9 @@ import android.widget.SeekBar;
 
 public class VerticalSeekBar extends SeekBar {
 
+    private static final String TAG = "VerticalSeekBar";
+    private static int barLength = 0;
+
     public VerticalSeekBar(Context context) {
         super(context);
     }
@@ -32,14 +35,17 @@ public class VerticalSeekBar extends SeekBar {
     }
 
     protected void onDraw(Canvas c) {
-        c.rotate(-90);
-        c.translate(-getHeight(),0);
+        c.rotate(90);
+        c.translate(0, -getWidth());
+
 
         super.onDraw(c);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        setMax(barLength);
+
         if (!isEnabled()) {
             return false;
         }
@@ -48,15 +54,26 @@ public class VerticalSeekBar extends SeekBar {
             case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_UP:
                 int i=0;
+                int v = (int) (getHeight() / event.getY());
                 i=getMax() - (int) (getMax() * event.getY() / getHeight());
-                setProgress(i);
-                Log.i("Progress",getProgress()+"");
+                Log.i("i", i + "");
+                setProgress(getMax() - i);
+                Log.i("Progress", getProgress() + "");
+                Log.i("event.getY()", event.getY()+"");
+                Log.i("getHeight()", getHeight() + "");
+                Log.i("getMax()", getMax() + "");
                 onSizeChanged(getWidth(), getHeight(), 0, 0);
+
                 break;
 
             case MotionEvent.ACTION_CANCEL:
                 break;
         }
         return true;
+    }
+
+    public static void setBarLength(int size) {
+        barLength = size;
+        Log.d(TAG, "BarLength: "+ barLength);
     }
 }
