@@ -16,6 +16,7 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.kulak.izabel.cameraapp.activity.CalculatorActivity;
+import com.kulak.izabel.cameraapp.activity.OnlineCatalogActivity;
 
 import java.util.ArrayList;
 
@@ -235,6 +236,8 @@ public class LeftMenu {
                 closeDrawer(position);
                 break;
             case 1:
+                changeActivity = new Intent(activity, OnlineCatalogActivity.class);
+                activity.startActivity(changeActivity);
                 closeDrawer(position);
                 break;
             case 2:

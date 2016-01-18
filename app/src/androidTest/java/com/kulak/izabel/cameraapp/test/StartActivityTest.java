@@ -26,7 +26,7 @@ public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
     }
 
     @MediumTest
-    public void testNextActivityWasLaunchedWithIntent() {
+    public void testBlobActivityButtonWasLaunchedWithIntent() {
         startActivity(mLaunchIntent, null, null);
         final ImageButton launchNextButton =
                 (ImageButton) getActivity()
@@ -36,6 +36,22 @@ public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
         final Intent launchIntent = getStartedActivityIntent();
         assertNotNull("Intent was null", launchIntent);
         String className = launchIntent.getComponent().getClassName();
-        assertEquals(className, "com.kulak.izabel.cameraapp.CameraActivity");
+        assertEquals(className, "com.kulak.izabel.cameraapp.ColorBlobDetectionActivity");
     }
+
+    @MediumTest
+    public void shouldLaunchPhotoActivity() {
+        startActivity(mLaunchIntent, null, null);
+        final ImageButton launchNextButton =
+                (ImageButton) getActivity()
+                        .findViewById(R.id.button_run_color_photo);
+        launchNextButton.performClick();
+
+        final Intent launchIntent = getStartedActivityIntent();
+        assertNotNull("Intent was null", launchIntent);
+        String className = launchIntent.getComponent().getClassName();
+        assertEquals(className, "com.kulak.izabel.cameraapp.PhotoActivity");
+    }
+
+
 }

@@ -13,6 +13,8 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
+import com.kulak.izabel.cameraapp.activity.MoldListActivity;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
@@ -120,7 +122,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         pickColorButton.setOnClickListener(new View.OnClickListener() {
                                                @Override
                                                public void onClick(View v) {
-
+                                                   Intent changeActivity = new Intent(ColorBlobDetectionActivity.this, MoldListActivity.class);
+                                                   ColorBlobDetectionActivity.this.startActivity(changeActivity);
 
                                                }
                                             }
@@ -128,13 +131,16 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     }
 
     public void openColorPickerFragment(){
-        if (COLOR_PICKER_ON != true) {
-            getFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack("A")
-                    .add(R.id.fragment_place, rightFragment)
-                    .commit();
+        if (COLOR_PICKER_ON == false) {
+            if (getFragmentManager().findFragmentById(R.id.fragment_place) == null) {
+                getFragmentManager()
+                        .beginTransaction()
+                        .addToBackStack("A")
+                        .add(R.id.fragment_place, rightFragment)
+                        .commit();
+            }
             COLOR_PICKER_ON = true;
+
         }
 
     }
@@ -290,10 +296,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(pickedColor);
 
-
         }
-
-
         return mRgba;
     }
 

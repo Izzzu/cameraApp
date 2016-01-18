@@ -1,6 +1,7 @@
 package com.kulak.izabel.cameraapp;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -10,12 +11,15 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
-import android.widget.ImageView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
@@ -39,7 +43,7 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
     private static final int SELECT_PICTURE = 1;
     private final LeftMenu leftMenu = new LeftMenu(R.id.drawer_layout_photo_activity);
 
-    private ImageView imageView;
+    private DynamicImageView imageView;
     private String TAG = "PhotoActivity";
 
 
@@ -74,6 +78,8 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
@@ -83,7 +89,7 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         }
         setContentView(R.layout.activity_photo);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        imageView = (ImageView) findViewById(R.id.selected_photo);
+        imageView = (DynamicImageView) findViewById(R.id.selected_photo);
         imageView.setOnTouchListener(PhotoActivity.this);
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
         rightFragment = new ColorPickerFragment(R.id.drawer_layout_photo_activity, this);
@@ -101,7 +107,6 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         );
 
         final ImageButton pickAPhotoButton = (ImageButton) findViewById(R.id.pick_photo_button);
-        //pickAPhotoButton.setLayoutParams(new LinearLayout.LayoutParams(btnSize, btnSize));
         pickAPhotoButton.setOnClickListener(new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {
@@ -132,6 +137,28 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         mBlobColorHsv = new Scalar(255);
         SPECTRUM_SIZE = new Size(200, 64);
         CONTOUR_COLOR = new Scalar(255, 255, 0);
+        setDisplay();
+
+    }
+
+    private void setDisplay() {
+        Display display = ((WindowManager)this.getApplicationContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+
+        if(display.getRotation() == Surface.ROTATION_0)
+        {
+            Log.d(TAG, "--->0");
+            DisplayMetrics displayMetrics = getApplicationContext().getResources().getDisplayMetrics();
+            float scale = displayMetrics.density;
+            float scaleHeigth = displayMetrics.heightPixels;
+            float scaleWidth = displayMetrics.widthPixels;
+            Log.d(TAG, "scaleHeight: " + scaleHeigth);
+            Log.d(TAG, "scaleWidth: " + scaleWidth);
+            Log.d(TAG, "density: " + displayMetrics.density);
+            Log.d(TAG, "densityDpi: " + displayMetrics.densityDpi);
+            Log.d(TAG, "scaledDensity: " + displayMetrics.scaledDensity);
+
+        }
+
     }
 
     @Override
@@ -166,11 +193,9 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
     public boolean onTouch(View v, MotionEvent event) {
         closeColorPickerFragment();
 
-        if (colorIsPicked() && mIsColorSelected) {
+        if (colorIsPicked()) {
             Log.d(TAG, "Color is picked");
-            Drawable imgDrawable = ((ImageView)imageView).getDrawable();
-            bitmap = ((BitmapDrawable)imgDrawable).getBitmap();
-            Utils.bitmapToMat(bitmap,mRgba);
+            getBitmapFromDrawable();
 
             int cols = mRgba.cols();
             int rows = mRgba.rows();
@@ -192,55 +217,69 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
 
             touchedRect.width = (x + 4 < cols) ? x + 4 - touchedRect.x : cols - touchedRect.x;
             touchedRect.height = (y + 4 < rows) ? y + 4 - touchedRect.y : rows - touchedRect.y;
-
             Mat touchedRegionRgba = mRgba.submat(touchedRect);
-
             Mat touchedRegionHsv = new Mat();
-            Imgproc.cvtColor(touchedRegionRgba, touchedRegionHsv, Imgproc.COLOR_RGB2HSV_FULL);
-
-            // Calculate average color of touched region
-            mBlobColorHsv = Core.sumElems(touchedRegionHsv);
-            int pointCount = touchedRect.width * touchedRect.height;
-            for (int i = 0; i < mBlobColorHsv.val.length; i++)
-                mBlobColorHsv.val[i] /= pointCount;
-
-            mBlobColorRgba = convertScalarHsv2Rgba(mBlobColorHsv);
-
-            Log.i(TAG, "Touched rgba color: (" + mBlobColorRgba.val[0] + ", " + mBlobColorRgba.val[1] +
-                    ", " + mBlobColorRgba.val[2] + ", " + mBlobColorRgba.val[3] + ")");
-
-            mDetector.setHsvColor(mBlobColorHsv);
-
+            selectColor(touchedRect, touchedRegionRgba, touchedRegionHsv);
             Imgproc.resize(mDetector.getSpectrum(), mSpectrum, SPECTRUM_SIZE);
-
             mIsColorSelected = true;
 
-            touchedRegionRgba.release();
-            touchedRegionHsv.release();
+            releaseUnusedRegions(touchedRegionRgba, touchedRegionHsv);
 
-            mDetector.process(mRgba);
-            List<MatOfPoint> contours = mDetector.getContours();
+            List<MatOfPoint> contours = detectContours();
+
             Mat orig = mRgba.clone();
 
-            if (pickedColor != null && !pickedColor.equals(ColorPickerFragment.getLastPicked()))
-                Log.d(TAG, "picked color: " + (int) pickedColor.val[0] + ", " + (int) pickedColor.val[1] + ", " + (int) pickedColor.val[2]);
             pickedColor = ColorPickerFragment.getLastPicked();
 
-            Imgproc.drawContours(orig, contours, -1, pickedColor, -1);
-            Core.addWeighted(orig, 0.4, mRgba, 0.6, 0.0, mRgba);
-            Mat colorLabel = mRgba.submat(4, 68, 4, 68);
-            colorLabel.setTo(pickedColor);
-
-            Imgproc.circle(mRgba, new Point(x, y), 3, new Scalar(255, 255, 255), -1);
-            Log.d(TAG, "Mat to bitmap");
+            colorBitmap(x, y, contours, orig);
             Utils.matToBitmap(mRgba, bitmap);
-            Log.d(TAG, "Set image bitmap");
-            imageView.setImageBitmap(bitmap);
-            Log.d(TAG, "Invalidate");
-            imageView.invalidate();
-            Log.d(TAG, "Invalidating done");
+            updateImageView();
         }
         return false; // don't need subsequent touch events
+    }
+
+    private void colorBitmap(int x, int y, List<MatOfPoint> contours, Mat orig) {
+        Imgproc.drawContours(orig, contours, -1, pickedColor, -1);
+        Core.addWeighted(orig, 0.4, mRgba, 0.6, 0.0, mRgba);
+        Imgproc.circle(mRgba, new Point(x, y), 3, new Scalar(255, 255, 255), -1);
+    }
+
+    private void updateImageView() {
+        imageView.setImageBitmap(bitmap);
+        Log.d(TAG, "Invalidate");
+        imageView.invalidate();
+        Log.d(TAG, "Invalidating done");
+    }
+
+    private void selectColor(org.opencv.core.Rect touchedRect, Mat touchedRegionRgba, Mat touchedRegionHsv) {
+        Imgproc.cvtColor(touchedRegionRgba, touchedRegionHsv, Imgproc.COLOR_RGB2HSV_FULL);
+
+        // Calculate average color of touched region
+        mBlobColorHsv = Core.sumElems(touchedRegionHsv);
+        int pointCount = touchedRect.width * touchedRect.height;
+        for (int i = 0; i < mBlobColorHsv.val.length; i++)
+            mBlobColorHsv.val[i] /= pointCount;
+
+        mBlobColorRgba = convertScalarHsv2Rgba(mBlobColorHsv);
+
+
+        mDetector.setHsvColor(mBlobColorHsv);
+    }
+
+    private List<MatOfPoint> detectContours() {
+        mDetector.process(mRgba);
+        return mDetector.getContours();
+    }
+
+    private void releaseUnusedRegions(Mat touchedRegionRgba, Mat touchedRegionHsv) {
+        touchedRegionRgba.release();
+        touchedRegionHsv.release();
+    }
+
+    private void getBitmapFromDrawable() {
+        Drawable imgDrawable = ((DynamicImageView) imageView).getDrawable();
+        bitmap = ((BitmapDrawable) imgDrawable).getBitmap();
+        Utils.bitmapToMat(bitmap, mRgba);
     }
 
     private boolean colorIsPicked() {
@@ -271,6 +310,7 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
     @Override
     public void onDestroy() {
         super.onDestroy();
+        COLOR_PICKER_ON = false;
         if (bitmap != null)
             bitmap.recycle();
     }
@@ -319,8 +359,48 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
 
         bitmap = BitmapFactory.decodeStream(imageStream2, new Rect(), bmOptions);
 
-        imageView.setImageBitmap(bitmap);
+        //imageView.setImageBitmap(bitmap);
+        imageView.setImageDrawable(new BitmapDrawable(bitmap));
+
     }
+
+
+/*
+
+    Display display = ((WindowManager)this.getContext().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay();
+
+    List<Camera.Size> sizes = getmSupportedPreviewSizes();
+
+    if(display.getRotation() == Surface.ROTATION_0)
+    {
+        Log.d(TAG, "--->0");
+
+        updateCameraSupportedSizeAndRotation(width, height, parameters, sizes, 90);
+    }
+
+    if(display.getRotation() == Surface.ROTATION_90)
+    {
+        Log.d(TAG, "--->90");
+
+        updateCameraSupportedSizeAndRotation(height, width, parameters, sizes, 0);
+    }
+
+    if(display.getRotation() == Surface.ROTATION_180)
+    {
+        Log.d(TAG, "--->180");
+
+        updateCameraSupportedSizeAndRotation(width, height, parameters, sizes, 0);
+    }
+
+    if(display.getRotation() == Surface.ROTATION_270)
+    {
+        Log.d(TAG, "--->270");
+
+        updateCameraSupportedSizeAndRotation(height, width, parameters, sizes, 180);
+
+    }
+    previewCamera();
+*/
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -335,13 +415,16 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
     }
 
     public void openColorPickerFragment() {
-        if (COLOR_PICKER_ON != true) {
-            getFragmentManager()
-                    .beginTransaction()
-                    .addToBackStack("A")
-                    .add(R.id.fragment_place, rightFragment)
-                    .commit();
+        if (COLOR_PICKER_ON == false) {
+            if (getFragmentManager().findFragmentById(R.id.fragment_place) == null) {
+                getFragmentManager()
+                        .beginTransaction()
+                        .addToBackStack("A")
+                        .add(R.id.fragment_place, rightFragment)
+                        .commit();
+            }
             COLOR_PICKER_ON = true;
+
         }
     }
 
