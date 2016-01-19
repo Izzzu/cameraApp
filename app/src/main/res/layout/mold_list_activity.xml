@@ -1,24 +1,68 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#14457e">
+    android:background="#14457e"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="50dp"
+        android:background="#3ac2f8">
+
+        <ImageView
+            android:id="@+id/left1"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:paddingRight="20dp"
+            android:src="@drawable/left1" />
+
+        <View
+            android:id="@+id/div_1"
+            style="@style/DividerHorizontal"
+            android:layout_alignRight="@+id/left1"
+            android:layout_centerInParent="true" />
+
+        <TextView
+            android:id="@+id/group_name"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:gravity="center"
+            android:text="CZERWONO-NIEBIESKIE"
+            android:textColor="#ffffff"
+            android:textSize="18dp" />
+
+        <View
+            android:id="@+id/div_2"
+            style="@style/DividerHorizontal"
+            android:layout_alignLeft="@+id/right1"
+            android:layout_centerInParent="true" />
+
+        <ImageView
+            android:id="@+id/right1"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:layout_gravity="end"
+            android:layout_marginRight="20dp"
+            android:paddingLeft="20dp"
+            android:src="@drawable/right1" />
+    </RelativeLayout>
 
     <com.kulak.izabel.cameraapp.VerticalSeekBar
+        android:id="@+id/seekBar"
         android:layout_width="50dp"
-        android:layout_height="fill_parent"
-        android:id="@+id/seekBar" />
+        android:layout_height="fill_parent" />
 
     <ListView
         android:id="@+id/mold_list"
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:choiceMode="singleChoice"
         android:layout_alignParentTop="true"
-        android:layout_toRightOf="@+id/seekBar"
-        android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
-
-        />
+        android:layout_marginRight="10dp"
+        android:layout_toRightOf="@+id/seekBar"
+        android:choiceMode="singleChoice" />
 
 </RelativeLayout>

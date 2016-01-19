@@ -1,9 +1,9 @@
 package com.kulak.izabel.cameraapp.activity;
 
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.ListView;
+import android.widget.SeekBar;
 
 import com.kulak.izabel.cameraapp.ColorMoldListItem;
 import com.kulak.izabel.cameraapp.MoldItemListAdapter;
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 
 public class MoldListActivity extends Activity {
 
+    private static final String TAG = "MoldListActivity";
     private VerticalSeekBar verticalSeekBar;
     private ListView listOfMolds;
 
@@ -22,30 +23,54 @@ public class MoldListActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.mold_list_activity);
 
-        ArrayList<ColorMoldListItem> moldListItems = new ArrayList<>();
-        populateColorMoldListItems(moldListItems);
-
-
-        VerticalSeekBar.setBarLength(moldListItems.size());
-        verticalSeekBar = (VerticalSeekBar) findViewById(R.id.seekBar);
         listOfMolds = (ListView) findViewById(R.id.mold_list);
+        ArrayList<ColorMoldListItem> moldListItems = populateColorMoldListItems();
 
-
+        setupVerticalSeekBar(moldListItems.size());
 
         MoldItemListAdapter adapter = new MoldItemListAdapter(getApplicationContext(), moldListItems);
-
         listOfMolds.setAdapter(adapter);
-
-
     }
 
-    private void populateColorMoldListItems(ArrayList<ColorMoldListItem> moldListItems) {
-        moldListItems.add(new ColorMoldListItem());
-        moldListItems.add(new ColorMoldListItem());
-        moldListItems.add(new ColorMoldListItem());
-        moldListItems.add(new ColorMoldListItem());
-        moldListItems.add(new ColorMoldListItem());
-        moldListItems.add(new ColorMoldListItem());
-        moldListItems.add(new ColorMoldListItem());
+    private void setupVerticalSeekBar(int size) {
+        VerticalSeekBar.setBarLength(size);
+        verticalSeekBar = (VerticalSeekBar) findViewById(R.id.seekBar);
+        verticalSeekBar.setOnSeekBarChangeListener(new CustomOnSeekBarChangeListener(size));
+    }
+
+    private ArrayList<ColorMoldListItem> populateColorMoldListItems() {
+        ArrayList<ColorMoldListItem> moldListItems = new ArrayList<>();
+        for (int i = 0; i < 7; i++) {
+            moldListItems.add(new ColorMoldListItem());
+        }
+        return moldListItems;
+    }
+
+    class CustomOnSeekBarChangeListener implements SeekBar.OnSeekBarChangeListener {
+
+        int sizeOfColors;
+        public CustomOnSeekBarChangeListener(int sizeOfColors) {
+            this.sizeOfColors = sizeOfColors;
+        }
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            int position = getPosition(progress);
+            listOfMolds.smoothScrollToPositionFromTop(position, 0);
+        }
+
+        private int getPosition(int progress) {
+            return (progress >= sizeOfColors && sizeOfColors > 0) ? sizeOfColors - 1 : progress;
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
     }
 }
