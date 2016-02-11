@@ -34,6 +34,10 @@ public class ColorPickerButtonAdapter extends BaseAdapter implements ButtonAdapt
         this.colorPickerFragment = colorPickerFragment;
     }
 
+    public ColorPickerButtonAdapter(Context c,  List<Scalar> backgroundColors) {
+        mContext = c;
+        this.backgroundColors = backgroundColors;
+    }
 
     public ColorPickerButtonAdapter(Context c) {
         mContext = c;
@@ -72,8 +76,6 @@ public class ColorPickerButtonAdapter extends BaseAdapter implements ButtonAdapt
         };
         return onClickListener;
     }
-
-
 
     // create a new ImageView for each item referenced by the Adapter
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)

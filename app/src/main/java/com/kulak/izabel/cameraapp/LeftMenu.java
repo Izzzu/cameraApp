@@ -246,8 +246,8 @@ public class LeftMenu {
                 mDrawerLayout.closeDrawers();
                 break;
             case 3:
-                closeDrawer(position);
-                break;
+                ((ColorHintInterface) activity).startColorHintFragment();
+                mDrawerLayout.closeDrawers();                break;
             case 4:
                 changeActivity = new Intent(activity, CalculatorActivity.class);
                 activity.startActivity(changeActivity);

@@ -11,6 +11,7 @@ public class VerticalSeekBar extends SeekBar {
 
     private static final String TAG = "VerticalSeekBar";
     private static int barLength = 0;
+    public boolean progressChangedManaully = false;
 
     public VerticalSeekBar(Context context) {
         super(context);
@@ -54,15 +55,8 @@ public class VerticalSeekBar extends SeekBar {
             case MotionEvent.ACTION_MOVE:
             case MotionEvent.ACTION_UP:
                 int i=0;
-                int v = (int) (getHeight() / event.getY());
-                i=getMax() - (int) (getMax() * event.getY() / getHeight());
-                Log.i("i", i + "");
-                setProgress(getMax() - i);
-                Log.i("Progress", getProgress() + "");
-                Log.i("event.getY()", event.getY()+"");
-                Log.i("getHeight()", getHeight() + "");
-                Log.i("getMax()", getMax() + "");
-                onSizeChanged(getWidth(), getHeight(), 0, 0);
+                float y = event.getY();
+                scrollTo(y);
 
                 break;
 
@@ -70,6 +64,24 @@ public class VerticalSeekBar extends SeekBar {
                 break;
         }
         return true;
+    }
+
+    public void scrollTo(float y) {
+        int i;
+        i=getMax() - (int) (getMax() * y / getHeight());
+        Log.i("i", i + "");
+        scrollManually(i);
+        Log.i("Progress", getProgress() + "");
+        Log.i("event.getY()", y +"");
+        Log.i("getHeight()", getHeight() + "");
+        Log.i("getMax()", getMax() + "");
+        onSizeChanged(getWidth(), getHeight(), 0, 0);
+        progressChangedManaully = false;
+    }
+
+    public void scrollManually(int i) {
+        setProgress(getMax() - i);
+        progressChangedManaully = true;
     }
 
     public static void setBarLength(int size) {

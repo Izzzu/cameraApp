@@ -34,6 +34,13 @@
         android:layout_height="match_parent"
         android:layout_gravity="end"
         android:id="@+id/fragment_place" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:id="@+id/color_hint_fragment_place" />
     <include layout="@layout/left_menu"/>
+
 
 </android.support.v4.widget.DrawerLayout>

@@ -21,6 +21,8 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
+import com.kulak.izabel.cameraapp.activity.ColorHintFragment;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
@@ -36,9 +38,10 @@ import org.opencv.imgproc.Imgproc;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.util.LinkedList;
 import java.util.List;
 
-public class PhotoActivity extends Activity implements View.OnTouchListener, ColorPickerOwner {
+public class PhotoActivity extends Activity implements View.OnTouchListener, ColorPickerOwner, ColorHintInterface {
 
     private static final int SELECT_PICTURE = 1;
     private final LeftMenu leftMenu = new LeftMenu(R.id.drawer_layout_photo_activity);
@@ -66,6 +69,8 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
     };
     private ColorPickerFragment rightFragment;
     private Scalar pickedColor = null;
+    private ColorHintFragment colorHintFragment;
+    private LinkedList<Scalar> colorHintColors = new LinkedList<>();
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
@@ -74,7 +79,6 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         leftMenu.changedLeftMenuConfiguration(newConfig);
         rightFragment.onConfigurationChanged(newConfig);
     }
-
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,6 +97,8 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
         imageView.setOnTouchListener(PhotoActivity.this);
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
         rightFragment = new ColorPickerFragment(R.id.drawer_layout_photo_activity, this);
+
+        colorHintFragment = new ColorHintFragment(/*this, new LinkedList<Scalar>()*/);
 
 
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
@@ -262,7 +268,8 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
 
         mBlobColorRgba = convertScalarHsv2Rgba(mBlobColorHsv);
 
-
+        colorHintColors.add(mBlobColorRgba);
+        colorHintFragment = new ColorHintFragment(/*this, colorHintColors*/);
         mDetector.setHsvColor(mBlobColorHsv);
     }
 
@@ -441,4 +448,14 @@ public class PhotoActivity extends Activity implements View.OnTouchListener, Col
 
     }
 
+    @Override
+    public void startColorHintFragment() {
+        if (getFragmentManager().findFragmentById(R.id.color_hint_fragment) == null) {
+            getFragmentManager()
+                    .beginTransaction()
+                    .addToBackStack("A")
+                    .add(R.id.color_hint_fragment_place, colorHintFragment)
+                    .commit();
+        }
+    }
 }

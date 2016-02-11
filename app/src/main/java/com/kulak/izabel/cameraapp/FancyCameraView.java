@@ -46,6 +46,7 @@ public class FancyCameraView extends JavaCameraView implements Camera.PictureCal
         mHolder = getHolder();
         // Log.d(TAG, "mHolder "+mHolder);
         mHolder.addCallback(this);
+
         // deprecated setting, but required on Android versions prior to 3.0
         mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
@@ -68,6 +69,17 @@ public class FancyCameraView extends JavaCameraView implements Camera.PictureCal
     }
 
     private List<Camera.Size> getSupportedPreviewSizes() {
+        List<int[]> supportedPreviewFpsRange = mCamera.getParameters().getSupportedPreviewFpsRange();
+        for (int[] i : supportedPreviewFpsRange) {
+            Log.d("CameraApp", "Supported preview fp range: ");
+            for (int k = 0; k<i.length; k++) {
+                Log.d("CameraApp", "fp range: " + i[k]);
+            }
+        }
+        List<Integer> supportedPreviewFrameRates = mCamera.getParameters().getSupportedPreviewFrameRates();
+        for (Integer a : supportedPreviewFrameRates) {
+            Log.d("CameraApp", "supportedPreviewFrameRates: " + a);
+        }
         return mCamera.getParameters().getSupportedPreviewSizes();
     }
 

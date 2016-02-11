@@ -8,7 +8,8 @@
     <RelativeLayout
         android:layout_width="fill_parent"
         android:layout_height="50dp"
-        android:background="#3ac2f8">
+        android:background="#3ac2f8"
+        android:id="@+id/toplabel">
 
         <ImageView
             android:id="@+id/left1"
@@ -50,6 +51,10 @@
             android:src="@drawable/right1" />
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_below="@+id/toplabel">
     <com.kulak.izabel.cameraapp.VerticalSeekBar
         android:id="@+id/seekBar"
         android:layout_width="50dp"
@@ -64,5 +69,5 @@
         android:layout_marginRight="10dp"
         android:layout_toRightOf="@+id/seekBar"
         android:choiceMode="singleChoice" />
-
+    </RelativeLayout>
 </RelativeLayout>

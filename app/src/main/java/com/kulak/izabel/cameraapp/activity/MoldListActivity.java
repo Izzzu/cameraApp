@@ -2,6 +2,8 @@ package com.kulak.izabel.cameraapp.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.AbsListView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 
@@ -24,6 +26,37 @@ public class MoldListActivity extends Activity {
         setContentView(R.layout.mold_list_activity);
 
         listOfMolds = (ListView) findViewById(R.id.mold_list);
+        listOfMolds.setScrollContainer(false);
+        listOfMolds.setClickable(false);
+        listOfMolds.setOnScrollListener(new AbsListView.OnScrollListener() {
+            public int firstVisibleItem = 0;
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+                if (scrollState==0) {
+                    if (verticalSeekBar!=null) {
+                        int progress = verticalSeekBar.getProgress();
+                        Log.d(TAG, "VerticalSeekBar, progress: "+progress);
+                        Log.d(TAG, "VertfirstVisibleItem: "+firstVisibleItem);
+                        if (firstVisibleItem != progress) {
+                            //verticalSeekBar.scroll(firstVisibleItem);
+                            Log.d(TAG, "firstVisible item not eqial to progress !!!!!!!!!!!!!!");
+                        }
+                    }
+            }}
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                this.firstVisibleItem = firstVisibleItem;
+                if (verticalSeekBar!=null) {
+                    int progress = verticalSeekBar.getProgress();
+                    Log.d(TAG, "VerticalSeekBar, progress: "+progress);
+                    Log.d(TAG, "VertfirstVisibleItem: "+firstVisibleItem);
+                    if (firstVisibleItem != progress) {
+                        //verticalSeekBar.scroll(firstVisibleItem);
+                    }
+                }
+            }
+        });
         ArrayList<ColorMoldListItem> moldListItems = populateColorMoldListItems();
 
         setupVerticalSeekBar(moldListItems.size());
@@ -55,8 +88,8 @@ public class MoldListActivity extends Activity {
 
         @Override
         public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            int position = getPosition(progress);
-            listOfMolds.smoothScrollToPositionFromTop(position, 0);
+                int position = getPosition(progress);
+                listOfMolds.smoothScrollToPositionFromTop(position, 0);
         }
 
         private int getPosition(int progress) {
