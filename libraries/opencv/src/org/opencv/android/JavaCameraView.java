@@ -162,6 +162,7 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
                     if (FocusModes != null && FocusModes.contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO)) {
                         params.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
                     }
+//TODO: try put setting fps properties here
 
                     mCamera.setParameters(params);
                     params = mCamera.getParameters();
@@ -353,7 +354,9 @@ public class JavaCameraView extends CameraBridgeViewBase implements PreviewCallb
 
                 if (!mStopThread && mCameraFrameReady) {
                     mCameraFrameReady = false;
-                    if (!mFrameChain[1 - mChainIdx].empty())
+                    Mat mat = mFrameChain[1 - mChainIdx];
+                    if (!mat.empty())
+                        Log.d(TAG, "mChainIdx:"+mChainIdx);
                         deliverAndDrawFrame(mCameraFrame[1 - mChainIdx]);
                 }
             } while (!mStopThread);

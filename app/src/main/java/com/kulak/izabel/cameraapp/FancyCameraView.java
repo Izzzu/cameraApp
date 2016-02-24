@@ -10,17 +10,18 @@ import android.support.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.Display;
+import android.view.OrientationEventListener;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
 
-import org.opencv.android.JavaCameraView;
+import org.opencv.android.BetterJavaCameraView;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public class FancyCameraView extends JavaCameraView implements Camera.PictureCallback {
+public class FancyCameraView extends BetterJavaCameraView implements Camera.PictureCallback {
 
     private static final String TAG = "FancyCamera";
     private String imagePath;
@@ -33,6 +34,8 @@ public class FancyCameraView extends JavaCameraView implements Camera.PictureCal
 
     private List<Camera.Size> mSupportedPreviewSizes;
     private Camera.Size mPreviewSize;
+    OrientationEventListener mOrientationListener;
+
 
 
     public FancyCameraView(Context context, AttributeSet attrs) {
@@ -210,15 +213,35 @@ public class FancyCameraView extends JavaCameraView implements Camera.PictureCal
         mSupportedPreviewSizes = getSupportedPreviewSizes();
         for(Camera.Size str: mSupportedPreviewSizes)
             Log.e(TAG, str.width + "/" + str.height);
+
         //mHolder = getHolder();
-        Log.d(TAG, "mHolder "+mHolder);
+        Log.d(TAG, "mHolder " + mHolder);
         Log.d(TAG, "initialize finished ");
+        /*Camera.Parameters parameters = mCamera.getParameters();
+        int rangebefore[] = new int[2];
+        parameters.getPreviewFpsRange(rangebefore);*/
+            //parameters.setPreviewFrameRate(30);
+            //mCamera.setParameters(parameters);
+        /*int range[] = new int[2];
+        mCamera.getParameters().getPreviewFpsRange(range);
+        Log.d(TAG, "fps range: --- " + range[0] + "," + range[1]);*/
+
         //mHolder.addCallback(this);
         // deprecated setting, but required on Android versions prior to 3.0
         //mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
         return b;
 
     }
+
+    /*//
+    // Native JNI
+    //
+    public native boolean ImageProcessing(int width, int height,
+                                          byte[] NV21FrameData, int [] pixels);
+    static
+    {
+        System.loadLibrary("ImageProcessing");
+    }*/
 
     public static void setCameraDisplayOrientation(Activity activity,
                                                    int cameraId, android.hardware.Camera camera)

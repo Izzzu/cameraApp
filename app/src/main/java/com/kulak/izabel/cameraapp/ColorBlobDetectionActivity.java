@@ -1,6 +1,7 @@
 package com.kulak.izabel.cameraapp;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -23,17 +24,15 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
-import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-import java.util.List;
-
 public class ColorBlobDetectionActivity extends FragmentActivity implements View.OnTouchListener, CvCameraViewListener2, ColorPickerOwner {
     private static final String  TAG              = "OCVSample::Activity";
+    private static final int THRESHOLD = 15;
 
     private boolean              mIsColorSelected = false;
     private Mat                  mRgba;
@@ -84,15 +83,18 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        //getActionBar().setDisplayHomeAsUpEnabled(false);
         setContentView(R.layout.blob_detection_activity);
         currentColorView = (ImageView) findViewById(R.id.current_color);
         mOpenCvCameraView = (FancyCameraView) findViewById(R.id.blob_camera_preview);
         mOpenCvCameraView.setCvCameraViewListener(this);
+        //mOpenCvCameraView.setMaxFrameSize(800, 800);
+
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
         rightFragment = new ColorPickerFragment(R.id.drawer_layout_blob_detection_activity, this);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
+
 
         backButton.setOnClickListener(new View.OnClickListener() {
                                                 @Override
@@ -130,6 +132,18 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         );
     }
 
+
+
+    private boolean isLandscape(int orientation){
+        return (orientation >= (90 - THRESHOLD) && orientation <= (90 + THRESHOLD)) || (orientation >= (270 - THRESHOLD) && orientation <= (270 + THRESHOLD));
+    }
+
+    private boolean isPortrait(int orientation){
+        return (orientation >= (360 - THRESHOLD) && orientation <= 360) || (orientation >= 0 && orientation <= THRESHOLD) || (orientation >= (180 - THRESHOLD) && orientation <= 180);
+    }
+
+
+
     public void openColorPickerFragment(){
         if (COLOR_PICKER_ON == false) {
             if (getFragmentManager().findFragmentById(R.id.fragment_place) == null) {
@@ -140,21 +154,11 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
                         .commit();
             }
             COLOR_PICKER_ON = true;
-
         }
-
     }
 
     public void closeColorPickerFragment(){
         rightFragment.closeDrawer();
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-
-        super.onConfigurationChanged(newConfig);
-        leftMenu.changedLeftMenuConfiguration(newConfig);
-        rightFragment.changedMenuConfiguration(newConfig);
     }
 
     @Override
@@ -173,6 +177,14 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         COLOR_PICKER_ON = false;
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        leftMenu.changedLeftMenuConfiguration(newConfig);
+        rightFragment.changedMenuConfiguration(newConfig);
+
     }
 
     @Override
@@ -282,13 +294,13 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
 
-        if (mIsColorSelected && colorIsPicked()) {
+       /* if (mIsColorSelected && colorIsPicked()) {
             mDetector.process(mRgba);
             List<MatOfPoint> contours = mDetector.getContours();
             Mat orig = mRgba.clone();
 
 
-            if (pickedColor!=null && !pickedColor.equals(ColorPickerFragment.getLastPicked())) Log.d(TAG,"picked color: "+ (int)pickedColor.val[0] + ", " + (int)pickedColor.val[1] + ", " + (int)pickedColor.val[2]);
+          //  if (pickedColor!=null && !pickedColor.equals(ColorPickerFragment.getLastPicked())) Log.d(TAG,"picked color: "+ (int)pickedColor.val[0] + ", " + (int)pickedColor.val[1] + ", " + (int)pickedColor.val[2]);
             pickedColor = ColorPickerFragment.getLastPicked();
 
             Imgproc.drawContours(orig, contours, -1, pickedColor, -1);
@@ -296,7 +308,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             Mat colorLabel = mRgba.submat(4, 68, 4, 68);
             colorLabel.setTo(pickedColor);
 
-        }
+        }*/
         return mRgba;
     }
 

@@ -23,7 +23,7 @@
             android:id="@+id/blob_camera_preview"
             android:layout_height="fill_parent"
             android:layout_width="fill_parent"
-            android:screenOrientation="portrait"
+            android:screenOrientation="landscape"
             android:configChanges="keyboardHidden|orientation"
             android:layout_weight="1" />
 

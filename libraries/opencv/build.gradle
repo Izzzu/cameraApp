@@ -30,3 +30,6 @@ android {
         }
     }
 }
+dependencies {
+    compile 'org.bytedeco.javacpp-presets:flycapture:2.8.3.1-1.1'
+}
