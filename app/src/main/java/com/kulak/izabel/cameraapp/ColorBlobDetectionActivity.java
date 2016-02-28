@@ -1,7 +1,6 @@
 package com.kulak.izabel.cameraapp;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -47,8 +46,6 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
 
     private LeftMenu leftMenu = new LeftMenu(R.id.drawer_layout_blob_detection_activity);
 
-
-
     private BaseLoaderCallback  mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -87,12 +84,10 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         currentColorView = (ImageView) findViewById(R.id.current_color);
         mOpenCvCameraView = (FancyCameraView) findViewById(R.id.blob_camera_preview);
         mOpenCvCameraView.setCvCameraViewListener(this);
-        //mOpenCvCameraView.setMaxFrameSize(800, 800);
 
         leftMenu.initializeLeftMenu(getResources(), getApplicationContext(), this);
         rightFragment = new ColorPickerFragment(R.id.drawer_layout_blob_detection_activity, this);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
 
 
@@ -132,8 +127,6 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         );
     }
 
-
-
     private boolean isLandscape(int orientation){
         return (orientation >= (90 - THRESHOLD) && orientation <= (90 + THRESHOLD)) || (orientation >= (270 - THRESHOLD) && orientation <= (270 + THRESHOLD));
     }
@@ -141,8 +134,6 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     private boolean isPortrait(int orientation){
         return (orientation >= (360 - THRESHOLD) && orientation <= 360) || (orientation >= 0 && orientation <= THRESHOLD) || (orientation >= (180 - THRESHOLD) && orientation <= 180);
     }
-
-
 
     public void openColorPickerFragment(){
         if (COLOR_PICKER_ON == false) {
@@ -164,6 +155,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
         // Sync the toggle state after onRestoreInstanceState has occurred.
         leftMenu.synchronizeLeftMenuState();
         rightFragment.synchronizeMenuState();

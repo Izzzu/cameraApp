@@ -120,7 +120,10 @@ public class BetterJavaCameraView extends CameraBridgeViewBase implements Previe
             if (sizes != null) {
                 /* Select the size that fits surface considering maximum size allowed */
                 Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
-
+                int[] range = new int[2];
+                params.getPreviewFpsRange(range);
+                Log.d(TAG, "fpsRange[0]="+range[0] + " fpsRange[1]="+range[1]);
+                Log.d(TAG, "frame rate:" +params.getPreviewFrameRate());
                 params.setPreviewFormat(ImageFormat.NV21);
                 // "generic" = android emulator
                 Log.d(TAG, "Build.BRAND: " + Build.BRAND);
@@ -181,7 +184,6 @@ public class BetterJavaCameraView extends CameraBridgeViewBase implements Previe
                 Log.d(TAG, "startPreview");
                 //mCamera.setDisplayOrientation(90);
                 Log.d(TAG, "displayOrientation: ");
-
                 mCamera.startPreview();
             } else
                 result = false;
