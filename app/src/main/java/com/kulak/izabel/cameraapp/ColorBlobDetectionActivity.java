@@ -1,6 +1,7 @@
 package com.kulak.izabel.cameraapp;
 
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -155,7 +156,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Sync the toggle state after onRestoreInstanceState has occurred.
         leftMenu.synchronizeLeftMenuState();

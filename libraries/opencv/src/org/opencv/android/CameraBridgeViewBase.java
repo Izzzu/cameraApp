@@ -425,78 +425,73 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
 
         if (bmpValid && mCacheBitmap != null) {
             Canvas canvas = getHolder().lockCanvas();
-            if (canvas != null) {
-                canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
-                Log.d(TAG, "mScale: "+mScale);
-                if (mScale != 0) {
-                    if(canvas.getWidth() > canvas.getHeight()) {
-                        Date start = new Date();
-
-                        canvas.drawBitmap(mCacheBitmap, new Rect(0,0,mCacheBitmap.getWidth(), mCacheBitmap.getHeight()),
-                                new Rect((int)((canvas.getWidth() - mScale*mCacheBitmap.getWidth()) / 2),
-                                        (int)((canvas.getHeight() - mScale*mCacheBitmap.getHeight()) / 2),
-                                        (int)((canvas.getWidth() - mScale*mCacheBitmap.getWidth()) / 2 + mScale*mCacheBitmap.getWidth()),
-                                        (int)((canvas.getHeight() - mScale*mCacheBitmap.getHeight()) / 2 + mScale*mCacheBitmap.getHeight())),
-                                null);
-                        Date end = new Date();
-
-                        Log.d(TAG, "landscape diff: " + (end.getTime() - start.getTime()));
-
-                    } else {
-                        Date start = new Date();
-
-                       /* int left = (int) ((canvas.getWidth() - mScale * mRotatedBitmap.getWidth()) / 2);
-                        int top = (int) ((canvas.getHeight() - mScale * mRotatedBitmap.getHeight()) / 2);
-                        int right = (int) ((canvas.getWidth() - mScale * mRotatedBitmap.getWidth()) / 2 + mScale * mRotatedBitmap.getWidth());
-                        int bottom = (int) ((canvas.getHeight() - mScale * mRotatedBitmap.getHeight()) / 2 + mScale * mRotatedBitmap.getHeight());
-                        Log.d(TAG,"left: "+left);
-                        Log.d(TAG,"top: "+top);
-                        Log.d(TAG,"right: "+right);
-                        Log.d(TAG,"bottom: "+bottom);*/
-                        canvas.drawBitmap(mRotatedBitmap, new Rect(0, 0, mRotatedBitmap.getWidth(), mRotatedBitmap.getHeight()),
-                                new Rect(0,
-                                        0,
-                                        canvas.getWidth()-1,
-                                        canvas.getHeight()-1),
-                                null);
-                       // canvas.scale(2,2);
-                       /* Matrix matrix = new Matrix();
-                        matrix.preTranslate((canvas.getWidth() - mScale*mCacheBitmap.getWidth()) / 2,(canvas.getHeight() - mScale*mCacheBitmap.getHeight()) / 2);
-                        if(getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-                            matrix.postRotate(90f,(canvas.getWidth()) / 2,(canvas.getHeight()) / 2);
-                        canvas.drawBitmap(mCacheBitmap, matrix, new Paint());*/
-
-
-                        //Bitmap bitmap = Bitmap.createScaledBitmap(mCacheBitmap, mCacheBitmap.getWidth()/3, mCacheBitmap.getHeight()/3, false);
-                        /*if (matrix == null) {
-                            Log.d(TAG, "rotating matrix");
-                            matrix = rotateMe(canvas, mResizedBitmap);
-                        }*/
-                        //canvas.drawBitmap(mCacheBitmap, null, dest, null);
-
-                        //canvas.drawBitmap(mResizedBitmap, matrix, null);
-
-
-                        Date end = new Date();
-                        Log.d(TAG, "portrait diff: " + (end.getTime() - start.getTime()));
-                    }
-                } else {
-                    canvas.drawBitmap(mCacheBitmap, new Rect(0, 0, mCacheBitmap.getWidth(), mCacheBitmap.getHeight()),
-                            new Rect((canvas.getWidth() - mCacheBitmap.getWidth()) / 2,
-                                    (canvas.getHeight() - mCacheBitmap.getHeight()) / 2,
-                                    (canvas.getWidth() - mCacheBitmap.getWidth()) / 2 + mCacheBitmap.getWidth(),
-                                    (canvas.getHeight() - mCacheBitmap.getHeight()) / 2 + mCacheBitmap.getHeight()), null);
-                }
-
-                if (mFpsMeter != null) {
-                    mFpsMeter.measure();
-                    mFpsMeter.draw(canvas, 20, 30);
-                }
-                getHolder().unlockCanvasAndPost(canvas);
-
-            }
+            initCanvas(canvas);
 
         }
+    }
+
+    private void initCanvas(Canvas canvas) {
+        if (canvas != null) {
+            canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
+            float mScale = getScale();
+            Log.d(TAG, "mScale: " + mScale);
+            drawOnCanvas(canvas, mScale);
+
+            //drawFpsMeterIfNeeded(canvas);
+            getHolder().unlockCanvasAndPost(canvas);
+
+        }
+    }
+
+    private void drawFpsMeterIfNeeded(Canvas canvas) {
+        if (mFpsMeter != null) {
+            mFpsMeter.measure();
+            mFpsMeter.draw(canvas, 20, 30);
+        }
+    }
+
+    private float getScale() {
+        float mScale;
+        if (this.mScale != 0 ) {
+            mScale = this.mScale;
+        }
+        else {
+            mScale = 1;
+        }
+        return mScale;
+    }
+
+    private void drawOnCanvas(Canvas canvas, float mScale) {
+        Date start = new Date();
+        Bitmap bitmap = this.mRotatedBitmap;
+        Rect src = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        int left = 0;
+        int top = 0;
+        int right = canvas.getWidth() - 1;
+        int bottom = canvas.getHeight() - 1;
+
+        if(canvas.getWidth() > canvas.getHeight()) {
+            bitmap = this.mCacheBitmap;
+            src = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+            left = (int) ((canvas.getWidth() - mScale * bitmap.getWidth()) / 2);
+            top = (int) ((canvas.getHeight() - mScale * bitmap.getHeight()) / 2);
+            right = (int) ((canvas.getWidth() - mScale * bitmap.getWidth()) / 2 + mScale * bitmap.getWidth());
+            bottom = (int) ((canvas.getHeight() - mScale * bitmap.getHeight()) / 2 + mScale * bitmap.getHeight());drawOnCanvas(canvas, bitmap, src, left, top, right, bottom);
+
+        }
+        drawOnCanvas(canvas, bitmap, src, left, top, right, bottom);
+        Date end = new Date();
+        Log.d(TAG, "landscape diff: " + (end.getTime() - start.getTime()));
+
+    }
+
+    private void drawOnCanvas(Canvas canvas, Bitmap bitmap, Rect src, int left, int top, int right, int bottom) {
+        canvas.drawBitmap(bitmap, src,
+                new Rect(left,
+                        top,
+                        right,
+                        bottom),
+                null);
     }
 
     private void drawOnCanvas(Canvas canvas) {
