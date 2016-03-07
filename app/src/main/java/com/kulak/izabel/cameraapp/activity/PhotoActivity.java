@@ -1,4 +1,4 @@
-package com.kulak.izabel.cameraapp;
+package com.kulak.izabel.cameraapp.activity;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,7 +21,13 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 
-import com.kulak.izabel.cameraapp.activity.ColorHintFragment;
+import com.kulak.izabel.cameraapp.ColorBlobDetector;
+import com.kulak.izabel.cameraapp.ColorHintInterface;
+import com.kulak.izabel.cameraapp.ColorPickerFragment;
+import com.kulak.izabel.cameraapp.ColorPickerOwner;
+import com.kulak.izabel.cameraapp.DynamicImageView;
+import com.kulak.izabel.cameraapp.LeftMenu;
+import com.kulak.izabel.cameraapp.R;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;

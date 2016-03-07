@@ -1,4 +1,4 @@
-package com.kulak.izabel.cameraapp;
+package com.kulak.izabel.cameraapp.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -9,6 +9,7 @@ import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.kulak.izabel.cameraapp.R;
 
 public class MapActivity extends FragmentActivity
         implements OnMapReadyCallback {

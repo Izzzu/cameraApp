@@ -57,8 +57,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     public static final int RGBA = 1;
     public static final int GRAY = 2;
     private Matrix matrix;
-    private Bitmap mResizedBitmap;
-    private Bitmap mRotatedBitmap;
 
     public CameraBridgeViewBase(Context context, int cameraId) {
         super(context);
@@ -75,8 +73,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         Log.d(TAG, "Attr count: " + Integer.valueOf(count));
 
         TypedArray styledAttrs = getContext().obtainStyledAttributes(attrs, R.styleable.CameraBridgeViewBase);
-        if (styledAttrs.getBoolean(R.styleable.CameraBridgeViewBase_show_fps, false))
-            enableFpsMeter();
+
 
         mCameraIndex = styledAttrs.getInt(R.styleable.CameraBridgeViewBase_camera_id, -1);
 
@@ -245,16 +242,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
     }
 
-    /**
-     * This method enables label with fps value on the screen
-     */
-    public void enableFpsMeter() {
-        if (mFpsMeter == null) {
-            mFpsMeter = new FpsMeter();
-            mFpsMeter.setResolution(mFrameWidth, mFrameHeight);
-        }
-    }
-
     public void disableFpsMeter() {
             mFpsMeter = null;
     }
@@ -382,10 +369,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             mCacheBitmap.recycle();
 
         }
-        if (mRotatedBitmap != null) {
-            mRotatedBitmap.recycle();
-
-        }
     }
 
     public static Bitmap rotateBitmap(Bitmap source, float angle)
@@ -410,11 +393,11 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
 
         boolean bmpValid = true;
+        Bitmap mRotatedBitmap = null;
         if (modified != null) {
             try {
                 Utils.matToBitmap(modified, mCacheBitmap);
                 mRotatedBitmap = rotateBitmap(mCacheBitmap, 90);
-                //mResizedBitmap = Bitmap.createScaledBitmap(mCacheBitmap, mCacheBitmap.getWidth() / 2, mCacheBitmap.getHeight() / 2, false);
             } catch(Exception e) {
                 Log.e(TAG, "Mat type: " + modified);
                 Log.e(TAG, "Bitmap type: " + mCacheBitmap.getWidth() + "*" + mCacheBitmap.getHeight());
@@ -423,19 +406,18 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
             }
         }
 
-        if (bmpValid && mCacheBitmap != null) {
+        if (bmpValid && mRotatedBitmap != null) {
             Canvas canvas = getHolder().lockCanvas();
-            initCanvas(canvas);
+            initCanvas(canvas, mRotatedBitmap);
 
         }
     }
 
-    private void initCanvas(Canvas canvas) {
+    private void initCanvas(Canvas canvas, Bitmap bitmap) {
         if (canvas != null) {
             canvas.drawColor(0, android.graphics.PorterDuff.Mode.CLEAR);
             float mScale = getScale();
-            Log.d(TAG, "mScale: " + mScale);
-            drawOnCanvas(canvas, mScale);
+            drawOnCanvas(canvas, mScale, bitmap);
 
             //drawFpsMeterIfNeeded(canvas);
             getHolder().unlockCanvasAndPost(canvas);
@@ -461,9 +443,8 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         return mScale;
     }
 
-    private void drawOnCanvas(Canvas canvas, float mScale) {
+    private void drawOnCanvas(Canvas canvas, float mScale, Bitmap bitmap) {
         Date start = new Date();
-        Bitmap bitmap = this.mRotatedBitmap;
         Rect src = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
         int left = 0;
         int top = 0;
@@ -481,7 +462,7 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
         }
         drawOnCanvas(canvas, bitmap, src, left, top, right, bottom);
         Date end = new Date();
-        Log.d(TAG, "landscape diff: " + (end.getTime() - start.getTime()));
+//        Log.d(TAG, "portrait diff: " + (end.getTime() - start.getTime()));
 
     }
 
@@ -492,17 +473,6 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
                         right,
                         bottom),
                 null);
-    }
-
-    private void drawOnCanvas(Canvas canvas) {
-        //Bitmap bitmap = Bitmap.createScaledBitmap(mCacheBitmap, mCacheBitmap.getWidth()/3, mCacheBitmap.getHeight()/3, false);
-        if (matrix == null) {
-            Log.d(TAG, "rotating matrix");
-            matrix = rotateMe(canvas, mResizedBitmap);
-        }
-        //canvas.drawBitmap(mCacheBitmap, null, dest, null);
-
-        canvas.drawBitmap(mResizedBitmap, matrix, null);
     }
 
     private Matrix rotateMe(Canvas canvas, Bitmap bm) {
@@ -546,7 +516,8 @@ public abstract class CameraBridgeViewBase extends SurfaceView implements Surfac
     protected void AllocateCache()
     {
         mCacheBitmap = Bitmap.createBitmap(mFrameWidth, mFrameHeight, Bitmap.Config.ARGB_8888);
-        mResizedBitmap = Bitmap.createScaledBitmap(mCacheBitmap, mCacheBitmap.getWidth() / 2, mCacheBitmap.getHeight() / 2, false);
+        //mResizedBitmap = Bitmap.createScaledBitmap(mCacheBitmap, mCacheBitmap.getWidth() / 2, mCacheBitmap.getHeight() / 2, false);
+        //mCacheBitmap = Bitmap.createScaledBitmap(mCacheBitmap, mCacheBitmap.getWidth() / 2, mCacheBitmap.getHeight() / 2, false);
     }
 
     public interface ListItemAccessor {

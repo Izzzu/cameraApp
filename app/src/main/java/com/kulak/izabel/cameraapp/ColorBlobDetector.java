@@ -1,11 +1,9 @@
 package com.kulak.izabel.cameraapp;
 
 import org.opencv.core.Core;
-import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Scalar;
-import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -50,14 +48,6 @@ public class ColorBlobDetector {
         mLowerBound.val[3] = 0;
         mUpperBound.val[3] = 255;
 
-        Mat spectrumHsv = new Mat(1, (int)(maxH-minH), CvType.CV_8UC3);
-
-        for (int j = 0; j < maxH-minH; j++) {
-            byte[] tmp = {(byte)(minH+j), (byte)255, (byte)255};
-            spectrumHsv.put(0, j, tmp);
-        }
-
-        Imgproc.cvtColor(spectrumHsv, mSpectrum, Imgproc.COLOR_HSV2RGB_FULL, 4);
     }
 
     public Mat getSpectrum() {
@@ -75,14 +65,14 @@ public class ColorBlobDetector {
         Imgproc.cvtColor(mPyrDownMat, mHsvMat, Imgproc.COLOR_RGB2HSV_FULL);
 
         Core.inRange(mHsvMat, mLowerBound, mUpperBound, mMask);
-       //Imgproc.dilate(mMask, mDilatedMask, new Mat());
-        Imgproc.blur(mDilatedMask, mDilatedMask, new Size(3, 3));
-        Imgproc.erode(mMask, mDilatedMask, new Mat());
+        Imgproc.dilate(mMask, mDilatedMask, new Mat());
+        //Imgproc.blur(mDilatedMask, mDilatedMask, new Size(3, 3));
+        //Imgproc.erode(mMask, mDilatedMask, new Mat());
 
 
         List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
 
-        Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
+        Imgproc.findContours(mDilatedMask, contours, mHierarchy, Imgproc.RETR_LIST, Imgproc.CHAIN_APPROX_SIMPLE);
 
         // Find max contour area
         double maxArea = 0;

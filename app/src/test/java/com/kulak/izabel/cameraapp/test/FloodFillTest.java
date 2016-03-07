@@ -4,8 +4,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 
-import com.kulak.izabel.cameraapp.FloodFill;
-
 import org.junit.Ignore;
 import org.junit.Test;
 

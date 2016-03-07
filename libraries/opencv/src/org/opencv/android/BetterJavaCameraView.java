@@ -119,20 +119,8 @@ public class BetterJavaCameraView extends CameraBridgeViewBase implements Previe
 
             if (sizes != null) {
                 /* Select the size that fits surface considering maximum size allowed */
-                Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
-                int[] range = new int[2];
-                params.getPreviewFpsRange(range);
-                Log.d(TAG, "fpsRange[0]="+range[0] + " fpsRange[1]="+range[1]);
-                Log.d(TAG, "frame rate:" +params.getPreviewFrameRate());
-                params.setPreviewFormat(ImageFormat.NV21);
-                // "generic" = android emulator
-                Log.d(TAG, "Build.BRAND: " + Build.BRAND);
-                if (Build.BRAND.toLowerCase().startsWith("generic")) {
-                    params.setPreviewFormat(ImageFormat.YV12);
-                    Log.d(TAG, "Check seting YV12");
-                }
-                Log.d(TAG, "Set preview size to " + Integer.valueOf((int) frameSize.width) + "x" + Integer.valueOf((int) frameSize.height));
-                params.setPreviewSize((int) frameSize.width, (int) frameSize.height);
+                setPreviewFormat(params);
+                setPreviewSize(width, height, params, sizes);
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.ICE_CREAM_SANDWICH && !Build.MODEL.equals("GT-I9100"))
                     params.setRecordingHint(true);
@@ -147,6 +135,8 @@ public class BetterJavaCameraView extends CameraBridgeViewBase implements Previe
 
                 mFrameWidth = params.getPreviewSize().width;
                 mFrameHeight = params.getPreviewSize().height;
+                Log.d(TAG, "mFrameWidth: "+mFrameWidth);
+                Log.d(TAG, "mFrameHeight: "+mFrameHeight);
 
                 if ((getLayoutParams().width == LayoutParams.MATCH_PARENT) && (getLayoutParams().height == LayoutParams.MATCH_PARENT))
                     mScale = Math.min(((float) height) / mFrameHeight, ((float) width) / mFrameWidth);
@@ -192,6 +182,20 @@ public class BetterJavaCameraView extends CameraBridgeViewBase implements Previe
             e.printStackTrace();
         }
         return result;
+    }
+
+    private void setPreviewSize(int width, int height, Camera.Parameters params, List<Camera.Size> sizes) {
+        Size frameSize = calculateCameraFrameSize(sizes, new JavaCameraSizeAccessor(), width, height);
+        params.setPreviewSize((int) frameSize.width, (int) frameSize.height);
+    }
+
+    private void setPreviewFormat(Camera.Parameters params) {
+        params.setPreviewFormat(ImageFormat.NV21);
+        Log.d(TAG, "Build.BRAND: " + Build.BRAND);
+        if (Build.BRAND.toLowerCase().startsWith("generic")) {
+            params.setPreviewFormat(ImageFormat.YV12);
+            Log.d(TAG, "Check seting YV12");
+        }
     }
 
     private void tryingToOpenCamera(int mCameraIndex) {
@@ -393,9 +397,10 @@ public class BetterJavaCameraView extends CameraBridgeViewBase implements Previe
                 if (!mStopThread && mCameraFrameReady) {
                     mCameraFrameReady = false;
                     Mat mat = mFrameChain[1 - mChainIdx];
-                    if (!mat.empty())
+                    if (!mat.empty()) {
                         //Log.d(TAG, "mChainIdx:" + mChainIdx);
-                    deliverAndDrawFrame(mCameraFrame[1 - mChainIdx]);
+                        deliverAndDrawFrame(mCameraFrame[1 - mChainIdx]);
+                    }
                 }
             } while (!mStopThread);
             Log.d(TAG, "Finish processing thread");

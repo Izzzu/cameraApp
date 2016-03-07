@@ -1,12 +1,19 @@
-package com.kulak.izabel.cameraapp;
+package com.kulak.izabel.cameraapp.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.widget.DrawerLayout;
 import android.util.Log;
+import android.view.Display;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
@@ -14,7 +21,12 @@ import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
-import com.kulak.izabel.cameraapp.activity.MoldListActivity;
+import com.kulak.izabel.cameraapp.ColorBlobDetector;
+import com.kulak.izabel.cameraapp.ColorPickerFragment;
+import com.kulak.izabel.cameraapp.ColorPickerOwner;
+import com.kulak.izabel.cameraapp.FancyCameraView;
+import com.kulak.izabel.cameraapp.LeftMenu;
+import com.kulak.izabel.cameraapp.R;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewFrame;
@@ -24,13 +36,17 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Rect;
 import org.opencv.core.Scalar;
 import org.opencv.core.Size;
 import org.opencv.imgproc.Imgproc;
 
-public class ColorBlobDetectionActivity extends FragmentActivity implements View.OnTouchListener, CvCameraViewListener2, ColorPickerOwner {
+import java.util.LinkedList;
+import java.util.List;
+
+public class ColorBlobDetectionActivity extends FragmentActivity implements View.OnTouchListener, CvCameraViewListener2, SensorEventListener, ColorPickerOwner {
     private static final String  TAG              = "OCVSample::Activity";
     private static final int THRESHOLD = 15;
 
@@ -70,6 +86,13 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     private ImageView currentColorView;
     private DrawerLayout rightDrawerLayout;
     private ColorPickerFragment rightFragment;
+    private List<Point> listOfPoints = new LinkedList<>();
+    private float[] mRotationMatrix = new float[9];
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
+    private boolean added;
+    private float[] inMemoryOrientationVals = new float[3];
+    private boolean initialize = true;
 
     public ColorBlobDetectionActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
@@ -91,6 +114,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
 
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
 
         backButton.setOnClickListener(new View.OnClickListener() {
                                                 @Override
@@ -171,6 +196,8 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         COLOR_PICKER_ON = false;
         if (mOpenCvCameraView != null)
             mOpenCvCameraView.disableView();
+        mSensorManager.unregisterListener(this);
+
     }
 
     @Override
@@ -186,7 +213,6 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     {
         super.onResume();
         Log.d(TAG, "onResume");
-
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization");
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_3_0_0, this, mLoaderCallback);
@@ -194,6 +220,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
+        mSensorManager.registerListener(this, mSensor, 1000000);
     }
 
     public void onDestroy() {
@@ -226,23 +253,24 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             int cols = mRgba.cols();
             int rows = mRgba.rows();
 
-            int xOffset = (mOpenCvCameraView.getWidth() - cols) / 2;
-            int yOffset = (mOpenCvCameraView.getHeight() - rows) / 2;
 
-            int x = (int) event.getX() - xOffset;
-            int y = (int) event.getY() - yOffset;
+            Display display = getWindowManager().getDefaultDisplay();
+            int[] location = new int[2];
+            v.getLocationOnScreen(location);
+            float viewX = event.getRawX() - location[0];
+            float viewY = event.getRawY() - location[1];
+            android.graphics.Point size = new android.graphics.Point();
+            display.getSize(size);
+            double width = size.x;
+            double height = size.y;
+            double y = rows - viewX*rows/width;
+            double x = viewY*cols/height;
+            Log.d(TAG, "POINT: "+x+ ", "+y);
+            listOfPoints.add(new Point(x, y));
+            Log.i(TAG, "Touch image coordinates: (" + (int)x + ", " + (int)y + ")");
+            if (((int)x < 0) || ((int)y < 0) || ((int)x > cols) || ((int)y > rows)) return false;
 
-            Log.i(TAG, "Touch image coordinates: (" + x + ", " + y + ")");
-
-            if ((x < 0) || (y < 0) || (x > cols) || (y > rows)) return false;
-
-            Rect touchedRect = new Rect();
-
-            touchedRect.x = (x > 4) ? x - 4 : 0;
-            touchedRect.y = (y > 4) ? y - 4 : 0;
-
-            touchedRect.width = (x + 4 < cols) ? x + 4 - touchedRect.x : cols - touchedRect.x;
-            touchedRect.height = (y + 4 < rows) ? y + 4 - touchedRect.y : rows - touchedRect.y;
+            Rect touchedRect = getTouchedRect(cols, rows, (int) y, (int) x);
 
             Mat touchedRegionRgba = mRgba.submat(touchedRect);
 
@@ -262,17 +290,79 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
 
             mDetector.setHsvColor(mBlobColorHsv);
 
-            Imgproc.resize(mDetector.getSpectrum(), mSpectrum, SPECTRUM_SIZE);
-
             mIsColorSelected = true;
 
             touchedRegionRgba.release();
             touchedRegionHsv.release();
-
-            Imgproc.circle(mRgba, new Point(x, y), 3, new Scalar(255, 255, 255), -1);
-
         }
+
         return false; // don't need subsequent touch events
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event)
+    {
+        // It is good practice to check that we received the proper sensor event
+        if (event.sensor.getType() == Sensor.TYPE_ROTATION_VECTOR)
+        {
+            // Convert the rotation-vector to a 4x4 matrix.
+            SensorManager.getRotationMatrixFromVector(mRotationMatrix,
+                    event.values);
+            SensorManager
+                    .remapCoordinateSystem(mRotationMatrix,
+                            SensorManager.AXIS_X, SensorManager.AXIS_Z,
+                            mRotationMatrix);
+            float[] orientationVals = new float[3];
+            SensorManager.getOrientation(mRotationMatrix, orientationVals);
+            if (initialize) {
+                saveOrientationVals(orientationVals);
+                initialize = false;
+            }
+
+            // Optionally convert the result from radians to degrees
+            /*orientationVals[0] = (float) Math.toDegrees(orientationVals[0]);
+            orientationVals[1] = (float) Math.toDegrees(orientationVals[1]);
+            orientationVals[2] = (float) Math.toDegrees(orientationVals[2]);*/
+
+            /*Log.d(TAG," Yaw: " + orientationVals[0] + "\n Pitch: "
+                    + orientationVals[1] + "\n Roll (not used): "
+                    + orientationVals[2]);*/
+
+
+            float d = inMemoryOrientationVals[0] - orientationVals[0];
+            if (listOfPoints.size()>0 && (Math.abs(d)>0.2)) {
+                Point point = listOfPoints.get(0);
+                Log.d(TAG, "Old point: " + point.x + ", " + point.y);
+                listOfPoints.clear();
+
+                double cos = Math.cos(d/2);
+                Log.d(TAG, "d: "+d+", cos(d/2): "+cos);
+                double v = point.y / cos;
+                Point newPoint = new Point(point.x, v);
+                listOfPoints.add(newPoint);
+                Log.d(TAG, "New point: " + newPoint.x + ", " + newPoint.y);
+                added = true;
+                Imgproc.circle(mRgba, newPoint, 10, new Scalar(205, 201, 201, 100), -1);
+                saveOrientationVals(orientationVals);
+            }
+        }
+    }
+
+    private void saveOrientationVals(float[] orientationVals) {
+        inMemoryOrientationVals[0] = orientationVals[0];
+        inMemoryOrientationVals[1] = orientationVals[1];
+        inMemoryOrientationVals[2] = orientationVals[2];
+    }
+
+    @NonNull
+    private Rect getTouchedRect(int cols, int rows, int y, int x) {
+        Rect touchedRect = new Rect();
+
+        touchedRect.x = (x > 4) ? x - 4 : 0;
+        touchedRect.width = (x + 4 < cols) ? x + 4 - touchedRect.x : cols - touchedRect.x;
+        touchedRect.y = (y > 4) ? y - 4 : 0;
+        touchedRect.height = (y + 4 < rows) ? y + 4 - touchedRect.y : rows - touchedRect.y;
+        return touchedRect;
     }
 
     private boolean colorIsPicked() {
@@ -288,21 +378,27 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
 
-       /* if (mIsColorSelected && colorIsPicked()) {
+        Mat orig = mRgba;
+        if (mIsColorSelected && colorIsPicked()) {
             mDetector.process(mRgba);
             List<MatOfPoint> contours = mDetector.getContours();
-            Mat orig = mRgba.clone();
-
+            orig = mRgba.clone();
 
           //  if (pickedColor!=null && !pickedColor.equals(ColorPickerFragment.getLastPicked())) Log.d(TAG,"picked color: "+ (int)pickedColor.val[0] + ", " + (int)pickedColor.val[1] + ", " + (int)pickedColor.val[2]);
             pickedColor = ColorPickerFragment.getLastPicked();
 
             Imgproc.drawContours(orig, contours, -1, pickedColor, -1);
             Core.addWeighted(orig, 0.4, mRgba, 0.6, 0.0, mRgba);
-            Mat colorLabel = mRgba.submat(4, 68, 4, 68);
-            colorLabel.setTo(pickedColor);
+           /* Mat colorLabel = mRgba.submat(4, 68, 4, 68);
+            colorLabel.setTo(pickedColor);*/
+        }
+        if (!listOfPoints.isEmpty()) {
+            for (Point p : listOfPoints) {
+                //Imgproc.circle(mRgba, p, 10, new Scalar(205, 201, 201, 100), -1);
+            }
 
-        }*/
+        }
+
         return mRgba;
     }
 
@@ -312,5 +408,10 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         Imgproc.cvtColor(pointMatHsv, pointMatRgba, Imgproc.COLOR_HSV2RGB_FULL, 4);
 
         return new Scalar(pointMatRgba.get(0, 0));
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
     }
 }

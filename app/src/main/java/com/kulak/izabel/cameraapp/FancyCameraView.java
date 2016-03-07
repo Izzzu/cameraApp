@@ -19,6 +19,7 @@ import org.opencv.android.BetterJavaCameraView;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.List;
 
 public class FancyCameraView extends BetterJavaCameraView implements Camera.PictureCallback {
@@ -232,6 +233,11 @@ public class FancyCameraView extends BetterJavaCameraView implements Camera.Pict
         return b;
 
     }
+
+    public List<Camera.Area> getFocusAreas() {
+        return mCamera!=null ? mCamera.getParameters().getFocusAreas() : new LinkedList<Camera.Area>();
+    }
+
 
     /*//
     // Native JNI

@@ -6,7 +6,7 @@ import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.ImageButton;
 
 import com.kulak.izabel.cameraapp.R;
-import com.kulak.izabel.cameraapp.StartActivity;
+import com.kulak.izabel.cameraapp.activity.StartActivity;
 
 
 public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
@@ -36,7 +36,7 @@ public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
         final Intent launchIntent = getStartedActivityIntent();
         assertNotNull("Intent was null", launchIntent);
         String className = launchIntent.getComponent().getClassName();
-        assertEquals(className, "com.kulak.izabel.cameraapp.ColorBlobDetectionActivity");
+        assertEquals(className, "com.kulak.izabel.cameraapp.activity.ColorBlobDetectionActivity");
     }
 
     @MediumTest
@@ -50,7 +50,7 @@ public class StartActivityTest extends ActivityUnitTestCase<StartActivity> {
         final Intent launchIntent = getStartedActivityIntent();
         assertNotNull("Intent was null", launchIntent);
         String className = launchIntent.getComponent().getClassName();
-        assertEquals(className, "com.kulak.izabel.cameraapp.PhotoActivity");
+        assertEquals(className, "com.kulak.izabel.cameraapp.activity.PhotoActivity");
     }
 
 

@@ -5,7 +5,7 @@ import android.test.ActivityUnitTestCase;
 import android.test.suitebuilder.annotation.MediumTest;
 import android.widget.Button;
 
-import com.kulak.izabel.cameraapp.ColorBlobDetectionActivity;
+import com.kulak.izabel.cameraapp.activity.ColorBlobDetectionActivity;
 import com.kulak.izabel.cameraapp.R;
 
 

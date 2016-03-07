@@ -16,7 +16,9 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 
 import com.kulak.izabel.cameraapp.activity.CalculatorActivity;
+import com.kulak.izabel.cameraapp.activity.ColorBlobDetectionActivity;
 import com.kulak.izabel.cameraapp.activity.OnlineCatalogActivity;
+import com.kulak.izabel.cameraapp.activity.PhotoActivity;
 
 import java.util.ArrayList;
 
@@ -241,7 +243,7 @@ public class LeftMenu {
                 closeDrawer(position);
                 break;
             case 2:
-                changeActivity = new Intent(activity, MapActivity.class);
+                changeActivity = new Intent(activity, LastUsedColorsButtonAdapter.MapActivity.class);
                 activity.startActivity(changeActivity);
                 mDrawerLayout.closeDrawers();
                 break;

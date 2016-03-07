@@ -18,6 +18,8 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ListView;
 
+import com.kulak.izabel.cameraapp.activity.ColorBlobDetectionActivity;
+
 import org.opencv.core.Scalar;
 
 import java.util.ArrayList;
@@ -67,11 +69,11 @@ public class ColorPickerFragment extends Fragment {
         mDrawerLayout.setDrawerListener(mDrawerToggle);
     }
 
-    void changedMenuConfiguration(Configuration newConfig) {
+    public void changedMenuConfiguration(Configuration newConfig) {
         mDrawerToggle.onConfigurationChanged(newConfig);
     }
 
-    void synchronizeMenuState() {
+    public void synchronizeMenuState() {
         mDrawerToggle.syncState();
     }
 
