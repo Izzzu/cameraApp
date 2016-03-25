@@ -94,6 +94,17 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
     private float[] inMemoryOrientationVals = new float[3];
     private boolean initialize = true;
 
+    private Sensor mAccelerometer;
+    private Sensor mMagnetometer;
+
+    private float[] mLastAccelerometer = new float[3];
+    private float[] mLastMagnetometer = new float[3];
+    private boolean mLastAccelerometerSet = false;
+    private boolean mLastMagnetometerSet = false;
+
+    private float[] mR = new float[9];
+    private float[] mOrientation = new float[3];
+
     public ColorBlobDetectionActivity() {
         Log.i(TAG, "Instantiated new " + this.getClass());
     }
@@ -115,7 +126,10 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         final ImageButton backButton = (ImageButton) findViewById(R.id.back);
 
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+        //mSensor = mSensorManager.getDefaultSensor(SensorManager.SENSOR_ORIENTATION);
+        mAccelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mMagnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+
 
         backButton.setOnClickListener(new View.OnClickListener() {
                                                 @Override
@@ -220,7 +234,12 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             Log.d(TAG, "OpenCV library found inside package. Using it!");
             mLoaderCallback.onManagerConnected(LoaderCallbackInterface.SUCCESS);
         }
-        mSensorManager.registerListener(this, mSensor, 1000000);
+        //mSensorManager.registerListener(this, mSensor, 1000000);
+        mLastAccelerometerSet = false;
+        mLastMagnetometerSet = false;
+        mSensorManager.registerListener(this, mAccelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(this, mMagnetometer, SensorManager.SENSOR_DELAY_NORMAL);
+
     }
 
     public void onDestroy() {
@@ -299,7 +318,7 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
         return false; // don't need subsequent touch events
     }
 
-    @Override
+   /* @Override
     public void onSensorChanged(SensorEvent event)
     {
         // It is good practice to check that we received the proper sensor event
@@ -320,14 +339,13 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
             }
 
             // Optionally convert the result from radians to degrees
-            /*orientationVals[0] = (float) Math.toDegrees(orientationVals[0]);
+            *//*orientationVals[0] = (float) Math.toDegrees(orientationVals[0]);
             orientationVals[1] = (float) Math.toDegrees(orientationVals[1]);
-            orientationVals[2] = (float) Math.toDegrees(orientationVals[2]);*/
+            orientationVals[2] = (float) Math.toDegrees(orientationVals[2]);*//*
 
-            /*Log.d(TAG," Yaw: " + orientationVals[0] + "\n Pitch: "
+            *//*Log.d(TAG," Yaw: " + orientationVals[0] + "\n Pitch: "
                     + orientationVals[1] + "\n Roll (not used): "
-                    + orientationVals[2]);*/
-
+                    + orientationVals[2]);*//*
 
             float d = inMemoryOrientationVals[0] - orientationVals[0];
             if (listOfPoints.size()>0 && (Math.abs(d)>0.2)) {
@@ -344,6 +362,41 @@ public class ColorBlobDetectionActivity extends FragmentActivity implements View
                 added = true;
                 Imgproc.circle(mRgba, newPoint, 10, new Scalar(205, 201, 201, 100), -1);
                 saveOrientationVals(orientationVals);
+            }
+        }
+    }*/
+
+    public void onSensorChanged(SensorEvent event) {
+        if (event.sensor == mAccelerometer) {
+            System.arraycopy(event.values, 0, mLastAccelerometer, 0, event.values.length);
+            mLastAccelerometerSet = true;
+        } else if (event.sensor == mMagnetometer) {
+            System.arraycopy(event.values, 0, mLastMagnetometer, 0, event.values.length);
+            mLastMagnetometerSet = true;
+        }
+        if (mLastAccelerometerSet && mLastMagnetometerSet) {
+            SensorManager.getRotationMatrix(mR, null, mLastAccelerometer, mLastMagnetometer);
+            SensorManager.getOrientation(mR, mOrientation);
+            float d = mOrientation[0] - inMemoryOrientationVals[0];
+            if (listOfPoints.size()>0 && (Math.abs(d)>0.2)) {
+                Point point = listOfPoints.get(0);
+                double cos = Math.cos(d);
+                Log.d(TAG, "d: " + d + ", cos(d): " + cos);
+                double v = point.y / cos;
+                Point newPoint = new Point(point.x, v);
+                listOfPoints.remove(0);
+                listOfPoints.add(newPoint);
+                Log.d(TAG, "New point: " + newPoint.x + ", " + newPoint.y);
+                added = true;
+                Imgproc.circle(mRgba, newPoint, 10, new Scalar(205, 201, 201, 100), -1);
+            }
+            Log.i("OrientationTestActivity", String.format("Orientation: %f, %f, %f",
+                    Math.toDegrees(mOrientation[0]), Math.toDegrees(mOrientation[1]), Math.toDegrees(mOrientation[2])));
+            if (initialize) {
+                inMemoryOrientationVals[0] = mOrientation[0];
+                inMemoryOrientationVals[1] = mOrientation[1];
+                inMemoryOrientationVals[2] = mOrientation[2];
+                initialize = false;
             }
         }
     }
